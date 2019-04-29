@@ -61,7 +61,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
   fTimer->Start();
-  fFileName = "../Data/Test.csv";
+  fFileName = "../Data/PENPlates.csv";
   fMan->SetVerboseLevel(0);
   fMan->OpenFile(fFileName);
  //  fMan->CreateH1("Light Output","N Photons Detected",250,0,100000);

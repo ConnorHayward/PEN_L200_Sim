@@ -273,9 +273,9 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
         break;
       }
       absEnergy[absEntries] = (1240/wavelength)*eV;
-      abs[absEntries] = varabsorlength;
+      abs[absEntries] = 1*m;
       emission[absEntries] = ems;
-      rIndex[absEntries] = fLY; // 1.4906 for PMMA
+      rIndex[absEntries] = 1.65; // 1.4906 for PMMA
       rIndex_fAir[absEntries]=1.0;
       ems_abs[absEntries]=0.02;
       emission_fibre[absEntries]=1.0;
@@ -586,7 +586,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   SiliconPlateConstruction plate;
   G4VSolid* final_plate = plate.ConstructPlate();
-  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fSi,"plate");
+  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fPEN,"plate");
   G4cout <<  G4BestUnit(plate_log->GetMass(true),"Mass") << G4endl;
   G4ThreeVector point = G4ThreeVector(0,0,5*cm);
 
