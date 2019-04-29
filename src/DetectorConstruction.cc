@@ -535,9 +535,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 // ------------- Volumes --------------
 
 // The experimental Hall
-  fWorldBox = new G4Tubs("World",0,0.25*m,0.5*m,0.*deg,360.*deg);
+  fWorldBox = new G4Tubs("World",0,0.26*m,0.5*m,0.*deg,360.*deg);
 
-  fWLBox = new G4LogicalVolume(fWorldBox,fWorldMaterial,"World",0,0,0);
+  fWLBox = new G4LogicalVolume(fWorldBox,fLAr,"World",0,0,0);
 
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
@@ -565,6 +565,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double detector_height = 14*mm;
   G4Tubs* geDetector = new G4Tubs("Crystal", 0, 31.5*mm, detector_height, 0.*deg, 360.*deg);
   G4LogicalVolume* ge_log = new G4LogicalVolume(geDetector, fGe, "crystal_log",0,0,0);
+
+  G4Tubs* hit_tracker = new G4Tubs("tracker",0.25*m,0.26*m,0.5*m,0.*deg,360.*deg);
+  G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fLAr, "tracker",0,0,0);
 
   G4NistManager* man = G4NistManager::Instance();
 
@@ -632,12 +635,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ReadEff.close();
   effCounter--;
 
-  const G4int nPMT_EFF = sizeof(photocath_energy)/sizeof(G4double);
+  G4double energyPerfect[]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 10.*eV};
+  G4double effPerfect[]  = {1, 1, 1, 1, 1};
+  G4double reflPerfect[]  = {0, 0, 0, 0, 0};
+
+  const G4int nPMT_EFF = sizeof(energyPerfect)/sizeof(G4double);
 
   G4OpticalSurface* perfect_optsurf = new G4OpticalSurface("perfect",glisur,polished, dielectric_metal);
   G4MaterialPropertiesTable* detector_MT = new G4MaterialPropertiesTable();
-  detector_MT->AddProperty("EFFICIENCY", photocath_energy, perfect_EFF,nPMT_EFF);
-  detector_MT->AddProperty("REFLECTIVITY", photocath_energy, perfect_REFL,nPMT_EFF);
+  detector_MT->AddProperty("EFFICIENCY", energyPerfect, effPerfect,nPMT_EFF)->SetSpline(true);
+  detector_MT->AddProperty("REFLECTIVITY", energyPerfect, reflPerfect,nPMT_EFF)->SetSpline(true);
   perfect_optsurf->SetMaterialPropertiesTable(detector_MT);
 
   G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
@@ -661,6 +668,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4VPhysicalVolume* crystal_placement;
   G4VPhysicalVolume* rod_placement;
+  G4VPhysicalVolume* tracker_placement;
   G4double tmpR = 46.*mm + 1*mm + 1.5*mm;
 
   /*
@@ -716,6 +724,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height-j*5*cm),plate_log,"top-plate",fWLBox,false,j,false);
     }
   }
-
+  new G4LogicalSkinSurface("tracker_surf",tracker_log,perfect_optsurf);
+  tracker_placement = new G4PVPlacement(0, G4ThreeVector(0,0,0),tracker_log,"tracker",fWLBox,false,0,false);
   return fWPBox;
 }

@@ -13,7 +13,7 @@ Number of photons leaving the target. Geometry independent version of light outp
 
 To use: Navigate to build folder and enter:
 
-cmake -DGeant4_DIR=/opt/geant4/lib64/Geant4-10.3.0 ..
+cmake -DGeant4_DIR=/opt/geant4/lib64/Geant4-10.5.0 ..
 
 This creates the makefile as needed. Then, run make to create the simulation. ./PEN runs the program.
 

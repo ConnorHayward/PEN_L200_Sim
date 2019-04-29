@@ -63,12 +63,12 @@ void EventAction::EndOfEventAction(const G4Event* myEvent)
 	// }
 //	G4cout << "End of Event" << G4endl;
 
-	if(fDetectedPhotons > 0){
-		analysisManager->FillNtupleDColumn(0,0,fTopPhoton);
-		analysisManager->FillNtupleDColumn(0,1,fBottomPhoton);
-		analysisManager->FillNtupleDColumn(0,2,fSidePhoton);
-		analysisManager->FillNtupleDColumn(0,3,fDetectedPhotons);
-		analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
-		analysisManager->AddNtupleRow(0);
-	}
+	 if(fDetectedPhotons > 0){
+ 		analysisManager->FillNtupleDColumn(0,0,1);
+	// 	analysisManager->FillNtupleDColumn(0,1,fBottomPhoton);
+	// 	analysisManager->FillNtupleDColumn(0,2,fSidePhoton);
+	// 	analysisManager->FillNtupleDColumn(0,3,fDetectedPhotons);
+	// 	analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
+	 	analysisManager->AddNtupleRow(0);
+	 }
 }

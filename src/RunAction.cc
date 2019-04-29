@@ -61,8 +61,8 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
   fTimer->Start();
-  fFileName = "/home/iwsatlas1/hayward/Documents/LOSim/Data/"+fDetector->GetDetectorName();
-  fMan->SetVerboseLevel(1);
+  fFileName = "../Data/Test.csv";
+  fMan->SetVerboseLevel(0);
   fMan->OpenFile(fFileName);
  //  fMan->CreateH1("Light Output","N Photons Detected",250,0,100000);
  // fMan->CreateH1("Energy in Target","Deposited energy target [MeV]",500,0,2);
@@ -73,13 +73,13 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
  // fMan->CreateH1("Detected Wavelength [nm]", "Wavelgnth of detected photon [nm]",50,400,500);
 
   //
-  fMan->CreateNtuple("EscapedPhotons","Escapes");
-  fMan->CreateNtupleDColumn("Top");
-  fMan->CreateNtupleDColumn("Botom");
-  fMan->CreateNtupleDColumn("Side");
-  fMan->CreateNtupleDColumn("Total");
-  fMan->CreateNtupleDColumn("Deposited");
-  fMan->FinishNtuple();
+   fMan->CreateNtuple("EscapedDemo","Demo");
+   fMan->CreateNtupleDColumn("Hits");
+  // fMan->CreateNtupleDColumn("Botom");
+  // fMan->CreateNtupleDColumn("Side");
+  // fMan->CreateNtupleDColumn("Total");
+  // fMan->CreateNtupleDColumn("Deposited");
+   fMan->FinishNtuple();
 }
 
 void RunAction::SetFileName(G4String fileName)
