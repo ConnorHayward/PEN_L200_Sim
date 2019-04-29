@@ -559,8 +559,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   double rod_sides = 2.5*mm;
   double rod_length = 48*mm;
 
-  G4Box* rod = new G4Box("target",rod_sides,rod_sides,rod_length);
-  G4LogicalVolume* rod_log = new G4LogicalVolume(rod,fPEN,"target",0,0,0);
+  G4Tubs* rod = new G4Tubs("target",0,1.5*mm,20*cm,0.*deg,360.*deg);
+  G4LogicalVolume* rod_log = new G4LogicalVolume(rod,fCu,"target",0,0,0);
+
+  G4double detector_height = 14*mm;
+  G4Tubs* geDetector = new G4Tubs("Crystal", 0, 31.5*mm, detector_height, 0.*deg, 360.*deg);
+  G4LogicalVolume* ge_log = new G4LogicalVolume(geDetector, fGe, "crystal_log",0,0,0);
 
   G4NistManager* man = G4NistManager::Instance();
 
@@ -640,12 +644,78 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4RotationMatrix* rotationMatrix1 = new G4RotationMatrix(0,0,0);
   G4RotationMatrix* rotationMatrix2 = new G4RotationMatrix(0,0,0);
 
+  G4VisAttributes* detectorAttr = new G4VisAttributes(G4Colour::Grey());
+  detectorAttr->SetVisibility(true);
+  detectorAttr->SetForceSolid(true);
+  ge_log->SetVisAttributes(detectorAttr);
+
+  G4VisAttributes* rodAttr = new G4VisAttributes(G4Colour::Grey());
+  rodAttr->SetVisibility(true);
+  rodAttr->SetForceSolid(true);
+  rod_log->SetVisAttributes(rodAttr);
+
+  G4VisAttributes* plateAttr = new G4VisAttributes(G4Colour::Blue());
+  plateAttr->SetVisibility(true);
+  plateAttr->SetForceSolid(true);
+  plate_log->SetVisAttributes(plateAttr);
+
+  G4VPhysicalVolume* crystal_placement;
+  G4VPhysicalVolume* rod_placement;
+  G4double tmpR = 46.*mm + 1*mm + 1.5*mm;
+
   /*
   0 - PMT on base of tile, collimator included.
   */
   fDetectorType = 0;
 
-  fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),plate_log,"plate",fWLBox,false,0,false);
+  /* Middle String */
+  for(int i = 0; i < 3; i++){
+    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h+i*5*cm),plate_log,"plate",fWLBox,false,i,false);
+    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height+i*5*cm),ge_log,"crystal",fWLBox,false,i,false);
+    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height+i*5*cm),plate_log,"top-plate",fWLBox,false,i,false);
+    const G4double VertBarAngle = ((G4double) i) * 120.*deg;
+    const G4ThreeVector VertBarTranslation (/* x */ tmpR * std::cos(VertBarAngle),  /* y */ tmpR * std::sin(VertBarAngle), /* z */ 0.);
+    rod_placement = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,i,false);
+
+  }
+
+  for(int i = 1; i < 4; i++){
+    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h-i*5*cm),plate_log,"plate",fWLBox,false,3+i,false);
+    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height-i*5*cm),ge_log,"crystal",fWLBox,false,3+i,false);
+    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height-i*5*cm),plate_log,"top-plate",fWLBox,false,3+i,false);
+  }
+
+
+  /*
+  radius = 15*cm
+  x = radius * cos(n / num * 2 * PI);
+  y = radius * sin(n / num * 2 * PI);
+  */
+  G4double radius = 15*cm;
+  G4double x;
+  G4double y;
+  int detcounter = 7;
+  double PI = 3.1415926535897;
+
+  for(int i=0;i<6;i++){
+    x = radius * cos(2 * PI * i/6);
+    y = radius * sin(2 * PI * i/6);
+
+    for(int j = 0; j < 3; j++){
+      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h+j*5*cm),plate_log,"plate",fWLBox,false,j,false);
+      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height+j*5*cm),ge_log,"crystal",fWLBox,false,j,false);
+      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height+j*5*cm),plate_log,"top-plate",fWLBox,false,j,false);
+      const G4double VertBarAngle = ((G4double) j) * 120.*deg;
+      const G4ThreeVector VertBarTranslation (/* x */ x+tmpR * std::cos(VertBarAngle),  /* y */ y+tmpR * std::sin(VertBarAngle), /* z */ 0.);
+      rod_placement = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,j,false);
+    }
+
+    for(int j = 1; j < 4; j++){
+      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h-j*5*cm),plate_log,"plate",fWLBox,false,j,false);
+      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height-j*5*cm),ge_log,"crystal",fWLBox,false,j,false);
+      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height-j*5*cm),plate_log,"top-plate",fWLBox,false,j,false);
+    }
+  }
 
   return fWPBox;
 }
