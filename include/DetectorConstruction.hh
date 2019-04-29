@@ -117,7 +117,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4VPhysicalVolume* fWPBox;
     G4LogicalVolume* fWLBox;
-    G4Box* fWorldBox;
+    G4Tubs* fWorldBox;
     G4ThreeVector fPMTPlacement = G4ThreeVector(0,0,63.5*mm+fTargetThickness);
 
     G4Material* fPEN;

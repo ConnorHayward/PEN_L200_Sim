@@ -31,7 +31,6 @@
 #include "G4UnionSolid.hh"
 #include "G4SubtractionSolid.hh"
 #include "G4IntersectionSolid.hh"
-#include "G4UnionSolid.hh"
 #include "G4VoxelLimits.hh"
 
 #include "G4RunManager.hh"
@@ -536,7 +535,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 // ------------- Volumes --------------
 
 // The experimental Hall
-  fWorldBox = new G4Box("World",fExpHall_x,fExpHall_y,fExpHall_z);
+  fWorldBox = new G4Tubs("World",0,0.25*m,0.5*m,0.*deg,360.*deg);
 
   fWLBox = new G4LogicalVolume(fWorldBox,fWorldMaterial,"World",0,0,0);
 
@@ -565,42 +564,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4NistManager* man = G4NistManager::Instance();
 
-  // SourceHolder
-  G4double outer_holder_width1 = 12.5*mm;
-  G4double outer_holder_width2 = 15*mm;
-  G4double outer_pom_thickness = 2*mm;
-  G4double outer_al_thickness = 0.5*mm;
-  G4double inner_holder_width1 = 5.5*mm;
-  G4double inner_holder_width2 = 11.5*mm;
-  G4double inner_pom_thickness = 1*mm;
-  G4RotationMatrix* rotm = new G4RotationMatrix();
-
-  G4Box* outer_box = new G4Box("outer_box",outer_holder_width1,outer_holder_width2,outer_pom_thickness);
-  G4Box* inner_box = new G4Box("inner_box",inner_holder_width1,inner_holder_width2,inner_pom_thickness);
-  G4ThreeVector box_offset = G4ThreeVector(0,0,1*mm);
-  G4SubtractionSolid* pom_holder = new G4SubtractionSolid("pom_holder",outer_box,inner_box,rotm,box_offset);
-  G4LogicalVolume* pom_holder_log = new G4LogicalVolume(pom_holder,fABS,"pom_source_holder");
-
-  G4Box* al_box = new G4Box("al_box",outer_holder_width1,outer_holder_width2,outer_al_thickness);
-  G4LogicalVolume* al_box_log = new G4LogicalVolume(al_box, fAl, "al_box_log");
-
-  // Breadboard
-
-  G4double bread_board_width1 = 50*mm;
-  G4double bread_board_width2 = 100*mm;
-  G4double bread_board_thickness = 2.5*mm;
-
-  G4Box* breadboard_box = new G4Box("breadboard_box",bread_board_width1,bread_board_width2,bread_board_thickness);
-  G4LogicalVolume* breadboard_log = new G4LogicalVolume(breadboard_box,fAl, "breadboard_log");
-
-  // Table
-  G4double table_width1 = 0.1*m;
-  G4double table_width2 = 0.1*m;
-  G4double table_thickness = 15*mm;
-
-  G4Box* table_box = new G4Box("table_box",table_width1,table_width2,table_thickness);
-  G4LogicalVolume* table_log = new G4LogicalVolume(table_box, fWood,"table_log");
-
   // Silicon Plates
 
   fSiliconPlate_h = 1.5*mm;
@@ -616,7 +579,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   SiliconPlateConstruction plate;
   G4VSolid* final_plate = plate.ConstructPlate();
-  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fPEN,"plate");
+  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fSi,"plate");
   G4cout <<  G4BestUnit(plate_log->GetMass(true),"Mass") << G4endl;
   G4ThreeVector point = G4ThreeVector(0,0,5*cm);
 
@@ -630,49 +593,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   pointNavigator->LocateGlobalPointAndSetup(point);
 
   // --------------Detectors--------------
-
-  G4VSolid* side_sphere = new G4Sphere("side_sphere",70*mm,72*mm,0*deg,360*deg,0*deg, 360*deg);
-  G4LogicalVolume* sideSphereLog = new G4LogicalVolume(side_sphere, fWorldMaterial,"side_sphere");
-
-  // PMT_Round
   char filler;
   G4double wavelength;
-  G4double innerRadius_pmt = 0.*cm;
-  G4double outerRadius_pmt = 53*mm;
-  G4double outerRadius_cath = 46*mm;
-  G4double height_pmt = 63.5*mm;
-  G4double height_cath = 62.*mm;
-  G4double startAngle_pmt = 0.*deg;
-  G4double spanningAngle_pmt = 360.*deg;
-
-  G4Tubs* pmt = new G4Tubs("pmt_tube",innerRadius_pmt,outerRadius_pmt, height_pmt,startAngle_pmt,spanningAngle_pmt);
-  G4LogicalVolume* pmt_log = new G4LogicalVolume(pmt,fGlass, "pmt_log");
-  G4Tubs* Photocath = new G4Tubs("photocath_tube",innerRadius_pmt,outerRadius_cath,
-                          height_cath,startAngle_pmt,spanningAngle_pmt);
-  G4LogicalVolume* photocath_log = new G4LogicalVolume(Photocath, fAl,"photocath_log");
-
-  // PMT_Square
-  G4double casing_length = 30*mm/2;
-  G4double casing_height = 32.5*mm/2;
-  G4double casing_hole = 29*mm / 2;
-  G4double casing_hole_height = 31.5*mm/2;
-
-  G4double photo_cath_length = 26*mm/2;
-  G4double photo_cath_eff_length = 23*mm/2;
-  G4double photo_cath_height = 0.8*mm;
-
-  G4Box* pmt_case = new G4Box("case",casing_length,casing_length,casing_height);
-  G4Box* pHole = new G4Box("hole",casing_hole,casing_hole,casing_hole_height);
-  G4SubtractionSolid* pmt_shell = new G4SubtractionSolid("pmt_shell",pmt_case,pHole);
-
-  G4LogicalVolume* pmt_void = new G4LogicalVolume(pHole, fVacuum,"vacuum");
-  G4LogicalVolume* pmt_case_log = new G4LogicalVolume(pmt_shell,fPOM,"pmt_case_log");
-
-  G4Box* pmt_cath = new G4Box("pmt_cathode",photo_cath_length,photo_cath_length,photo_cath_height);
-  G4Box* pmt_active = new G4Box("pmt_active",photo_cath_eff_length,photo_cath_eff_length,photo_cath_height);
-  G4SubtractionSolid* pmt_inactive_cath = new G4SubtractionSolid("pmt_inactive_cathode",pmt_cath,pmt_active);
-  G4LogicalVolume* pmt_inactive_cath_log = new G4LogicalVolume(pmt_inactive_cath,fGlass,"pmt_inactive_cath_log");
-  G4LogicalVolume* pmt_cath_log = new G4LogicalVolume(pmt_active,fGlass,"pmt_cath_log");
 
   G4double cath_eff;
   G4double photocath_energy[57];
@@ -708,354 +630,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   const G4int nPMT_EFF = sizeof(photocath_energy)/sizeof(G4double);
 
-  G4OpticalSurface* photocath_optsurf = new G4OpticalSurface("photocath_opsurf",glisur,polished, dielectric_metal);
-  G4MaterialPropertiesTable* photocath_MT = new G4MaterialPropertiesTable();
-  photocath_MT->AddProperty("EFFICIENCY", photocath_energy, photocath_EFF,nPMT_EFF);
-  photocath_MT->AddProperty("REFLECTIVITY", photocath_energy, photocath_REFL,nPMT_EFF);
-  photocath_optsurf->SetMaterialPropertiesTable(photocath_MT);
-  new G4LogicalSkinSurface("photocath_surf",photocath_log,photocath_optsurf);
-  new G4LogicalSkinSurface("photocath_surf",pmt_cath_log,photocath_optsurf);
-
   G4OpticalSurface* perfect_optsurf = new G4OpticalSurface("perfect",glisur,polished, dielectric_metal);
   G4MaterialPropertiesTable* detector_MT = new G4MaterialPropertiesTable();
   detector_MT->AddProperty("EFFICIENCY", photocath_energy, perfect_EFF,nPMT_EFF);
   detector_MT->AddProperty("REFLECTIVITY", photocath_energy, perfect_REFL,nPMT_EFF);
   perfect_optsurf->SetMaterialPropertiesTable(detector_MT);
 
-  G4LogicalVolume* tile_detector = new G4LogicalVolume(fBox, fSi, "tile_detector");
-  new G4LogicalSkinSurface("perfect_sensor",tile_detector, perfect_optsurf);
-
-  // Spectrometer Sensor
-
-  G4double spectrometer_side = 2.5*mm;
-  G4double spectrometer_top = 1.5*mm;
-  G4double spectrometer_thickness = 0.5*mm;
-
-  G4Box* spectrometer_sensor = new G4Box("spec_sensor",spectrometer_top,spectrometer_side,spectrometer_thickness);
-  G4LogicalVolume* spec_log = new G4LogicalVolume(spectrometer_sensor,fSi,"spec_sensor_log");
-
-  G4double spec_energy[57];
-  G4double spec_EFF[57];
-  G4double spec_REFL[57]={0};
-  G4String spec_file = "../input_files/specQE.csv";
-
-//  ifstream ReadEff;
-  //G4int
-  effCounter = 0;
-  ReadEff.open(spec_file);
-
-  if(ReadEff.is_open())
-  {
-    while(!ReadEff.eof())
-    {
-      ReadEff>>wavelength>>filler>>cath_eff;
-      if(ReadEff.eof()){
-        break;
-      }
-      spec_energy[57-effCounter] = (1240/wavelength)*eV;
-      spec_EFF[57-effCounter] = cath_eff;
-      effCounter++;
-    }
-  }
-
-  else G4cout<<"Error opening file: " <<spec_file<<G4endl;
-  ReadEff.close();
-  effCounter--;
-
-  const G4int nSPEC_EFF = sizeof(spec_energy)/sizeof(G4double);
-
-  G4OpticalSurface* spec_optsurf = new G4OpticalSurface("photocath_opsurf",glisur,polished, dielectric_metal);
-  G4MaterialPropertiesTable* spec_MT = new G4MaterialPropertiesTable();
-  spec_MT->AddProperty("EFFICIENCY", spec_energy, spec_EFF,nSPEC_EFF);
-  spec_MT->AddProperty("REFLECTIVITY", spec_energy, spec_REFL,nSPEC_EFF);
-  spec_optsurf->SetMaterialPropertiesTable(spec_MT);
-  new G4LogicalSkinSurface("spec_surf",spec_log,spec_optsurf);
-
-
-  // SiPMs
-  G4double SiPM_side = 1.5*mm;
-  G4double SiPM_thickness = 0.225*mm;
-  G4double board_size = 25*mm;
-
-  G4double SiPM_case_side = 3.0*mm;
-  G4double SiPM_case_thickness = 1*mm;
-
-  G4Box* SiPM_window = new G4Box("SiPM_window",SiPM_side,SiPM_side,SiPM_thickness);
-  G4Box* board_window = new G4Box("board_window",board_size,board_size,SiPM_case_thickness);
-  G4Box* SiPM_case = new G4Box("SiPM_window",SiPM_case_side,SiPM_case_side,SiPM_case_thickness);
-  G4SubtractionSolid* SiPM_case_full = new G4SubtractionSolid("SiPM_case_full",SiPM_case, SiPM_window,0,G4ThreeVector(0,0,SiPM_case_thickness-SiPM_thickness));
-
-  G4LogicalVolume* SiPM_window_log = new G4LogicalVolume(SiPM_window,fSi,"SiPM_window_log");
-  G4LogicalVolume* SiPM_case_log = new G4LogicalVolume(SiPM_case_full,fSi,"SiPM_case_log");
-  G4LogicalVolume* SiPM_board_log = new G4LogicalVolume(board_window,fSi,"board_log");
-
-  G4double fill_factor = 0.74;
-
-  G4double SiPM_eff;
-  G4double SiPM_energy[57];
-  G4double SiPM_EFF[57];
-  G4double SiPM_REFL[57]={0};
-  G4String siPM_file = "../input_files/sipmQE.csv";
-
-  ifstream ReadEffSiPM;
-  G4int effCounterSiPM = 0;
-  ReadEffSiPM.open(siPM_file);
-
-  if(ReadEffSiPM.is_open())
-  {
-    while(!ReadEffSiPM.eof())
-    {
-      ReadEffSiPM>>wavelength>>filler>>SiPM_eff;
-      if(ReadEffSiPM.eof()){
-        break;
-      }
-      SiPM_energy[57-effCounterSiPM] = (1240/wavelength)*eV;
-      SiPM_EFF[57-effCounterSiPM] = SiPM_eff/100 * fill_factor;
-      effCounterSiPM++;
-    }
-  }
-
-  else G4cout<<"Error opening file: " <<siPM_file<<G4endl;
-  ReadEffSiPM.close();
-  effCounterSiPM--;
-
-  const G4int nSiPM_EFF = sizeof(SiPM_energy)/sizeof(G4double);
-
-  G4OpticalSurface* SiPM_optsurf = new G4OpticalSurface("SiPM_opsurf",glisur,polished, dielectric_metal);
-  G4MaterialPropertiesTable* SiPM_MT = new G4MaterialPropertiesTable();
-  SiPM_MT->AddProperty("EFFICIENCY", SiPM_energy, SiPM_EFF,nSiPM_EFF);
-  SiPM_MT->AddProperty("REFLECTIVITY", SiPM_energy, SiPM_REFL,nSiPM_EFF);
-  SiPM_optsurf->SetMaterialPropertiesTable(SiPM_MT);
-  new G4LogicalSkinSurface("sipm_surf",SiPM_window_log ,SiPM_optsurf);
-
-  // PMT Mount
-  G4double mount_base = 55*mm;
-  G4double pmt_neg_length = 55.1*mm;
-  G4double mount_height = 26*mm;
-  G4double mount_spacer = 9*mm;
-
-  G4Box* mount_block = new G4Box("mount_box",mount_base,mount_base,mount_height);
-  G4Box* pmt_neg = new G4Box("pmt_neg",casing_length,casing_length,pmt_neg_length);
-  G4Box* pmt_base_neg = new G4Box("pmt_base_neg",casing_length,casing_length,mount_spacer);
-
-  G4SubtractionSolid* mount_box = new G4SubtractionSolid("mount_box",mount_block,pmt_base_neg,rotm,G4ThreeVector(0,0,-9*mm));
-  rotm->rotateY(90.*deg);
-  mount_box = new G4SubtractionSolid("mount_box",mount_box,pmt_neg,rotm,G4ThreeVector(0*mm,0,18*mm));
-  rotm->rotateY(-90.*deg);
-  rotm->rotateX(90.*deg);
-  mount_box = new G4SubtractionSolid("mount_box",mount_box,pmt_neg,rotm,G4ThreeVector(0*mm,0,18*mm));
-
-  G4LogicalVolume* mount_box_log = new G4LogicalVolume(mount_box,fABS, "mount_box_log");
-
-  if (fDetectorType == 2){
-      parser.Read("geCounter.gdml",false);
-      fWPBox = parser.GetWorldVolume();
-    }
-
-  // Placement
-  G4LogicalVolume* topDet = new G4LogicalVolume(final_plate,fWorldMaterial,"top_det");
-  G4LogicalVolume* bottomDet = new G4LogicalVolume(final_plate,fWorldMaterial,"bottom_det");
-  G4LogicalVolume* sideDet = new G4LogicalVolume(side_det,fWorldMaterial,"side_det");
-  new G4LogicalSkinSurface("perfect_surf",topDet,perfect_optsurf);
-  new G4LogicalSkinSurface("perfect_surf",bottomDet,perfect_optsurf);
-  new G4LogicalSkinSurface("perfect_surf",sideDet,perfect_optsurf);
-  new G4LogicalSkinSurface("perfect_surf",sideSphereLog,perfect_optsurf);
-  new G4LogicalSkinSurface("perfect_surf",tile_detector,perfect_optsurf);
-
-  G4VPhysicalVolume* topDetPlacement;
-  G4VPhysicalVolume* bottomDetPlacement;
-  G4VPhysicalVolume* sideDetPlacement;
-
-  G4VPhysicalVolume* tablePlacement;
-  G4VPhysicalVolume* breadboardPlacement;
-
-  G4VPhysicalVolume* pmtPlacement;
-  G4VPhysicalVolume* incathPlacement;
-  G4VPhysicalVolume* cathPlacement;
-
-  G4VPhysicalVolume* pmtPlacement1;
-  G4VPhysicalVolume* incathPlacement1;
-  G4VPhysicalVolume* cathPlacement1;
-
-  G4VPhysicalVolume* pmtPlacement2;
-  G4VPhysicalVolume* incathPlacement2;
-  G4VPhysicalVolume* cathPlacement2;
-
-  G4VPhysicalVolume* pmtPlacement3;
-  G4VPhysicalVolume* incathPlacement3;
-  G4VPhysicalVolume* cathPlacement3;
-
-  G4VPhysicalVolume* pmtPlacement4;
-  G4VPhysicalVolume* incathPlacement4;
-  G4VPhysicalVolume* cathPlacement4;
-
-  G4VPhysicalVolume* pmtPlacement5;
-  G4VPhysicalVolume* incathPlacement5;
-  G4VPhysicalVolume* cathPlacement5;
-
-  G4VPhysicalVolume* collimator_phys;
-  G4VPhysicalVolume* al_phys;
-  G4VPhysicalVolume* collimator_phys1;
-  G4VPhysicalVolume* al_phys1;
-  G4VPhysicalVolume* pmt_holder_phys;
-
-  G4VPhysicalVolume* siPM_placement;
-  G4VPhysicalVolume* siPM_case_placement;
-  G4VPhysicalVolume* siPM_board_placement;
-
-  G4VPhysicalVolume* vacPlacement;
-
-  G4double fullPMT_height = 2*casing_height+2*photo_cath_height;
-  G4ThreeVector* pmtVector = new G4ThreeVector(0,0,-(casing_height+2*photo_cath_height+fTargetThickness));
-  fSourceVector = new G4ThreeVector(0,0,(casing_height+2*photo_cath_height+fTargetThickness));
-
-  // Set Draw G4VisAttributes
-
-  G4VisAttributes* visAttr = new G4VisAttributes();
-  visAttr->SetVisibility(false);
-  fWLBox->SetVisAttributes(visAttr);
-  pmt_void->SetVisAttributes(visAttr);
-  // Scintillator Materials
-  G4VisAttributes* tileAttr = new G4VisAttributes(G4Colour::Blue());
-  tileAttr->SetVisibility(true);
-  fLBox->SetVisAttributes(tileAttr);
-
-
-  // // Active Detectors
-   G4VisAttributes* detectorAttr = new G4VisAttributes(G4Colour::Green());
-   detectorAttr->SetVisibility(true);
-   detectorAttr->SetForceSolid(false);
-   pmt_cath_log->SetVisAttributes(detectorAttr);
-   SiPM_window_log->SetVisAttributes(detectorAttr);
-   topDet->SetVisAttributes(detectorAttr);
-   bottomDet->SetVisAttributes(detectorAttr);
-   sideDet->SetVisAttributes(detectorAttr);
-   sideSphereLog->SetVisAttributes(detectorAttr);
-
-  // // Inactive Regions
-  G4VisAttributes* supportAttr = new G4VisAttributes(G4Colour::Grey());
-  supportAttr->SetVisibility(true);
-  supportAttr->SetForceSolid(true);
-  pmt_inactive_cath_log->SetVisAttributes(supportAttr);
-
-  // Surrounding Materials
-
-  G4VisAttributes* surroundAttr = new G4VisAttributes(G4Colour::White());
-  surroundAttr->SetVisibility(true);
-  table_log->SetVisAttributes(surroundAttr);
-  breadboard_log->SetVisAttributes(surroundAttr);
-  pmt_case_log->SetVisAttributes(surroundAttr);
-
-  G4VisAttributes* mountAttr = new G4VisAttributes(G4Colour::Red());
-  mountAttr->SetVisibility(true);
-  mount_box_log->SetVisAttributes(mountAttr);
-
-  // Active Shielding
-  G4VisAttributes* shieldingAttr = new G4VisAttributes(G4Colour::Yellow());
-  shieldingAttr->SetVisibility(true);
-  pom_holder_log->SetVisAttributes(shieldingAttr);
-  al_box_log->SetVisAttributes(shieldingAttr);
-
   G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
   G4RotationMatrix* rotationMatrix1 = new G4RotationMatrix(0,0,0);
   G4RotationMatrix* rotationMatrix2 = new G4RotationMatrix(0,0,0);
-  G4RotationMatrix* rotationMatrix3 = new G4RotationMatrix(0,0,0);
-  G4RotationMatrix* rotationMatrix4 = new G4RotationMatrix(0,0,0);
-  G4RotationMatrix* rotationMatrix5 = new G4RotationMatrix(0,0,0);
+
   /*
   0 - PMT on base of tile, collimator included.
   */
   fDetectorType = 0;
-  switch (fDetectorType){
-    case 0:
-       fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),fLBox,"rod",fWLBox,false,0,true);
-       siPM_placement = new G4PVPlacement(0, G4ThreeVector(0,0,-6.001*mm),tile_detector,"spec",fWLBox,false,0,true);
 
-
-       // bottomDetPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,1.6*mm),bottomDet,"bottom_det",fWLBox,false,0,true);
-       // topDetPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,-1.6*mm),topDet,"top_det",fWLBox,false,0,true);
-       //
-       //
-       // sideDetPlacement = new G4PVPlacement(0, G4ThreeVector(0,0,0),sideSphereLog,"side_det",fWLBox,false,0,true);
-// //   Place PMT
-       // pmtPlacement = new G4PVPlacement(0,*pmtVector,pmt_case_log,"pmt",fWLBox,false,0,true);
-       // cathPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+photo_cath_height)),pmt_cath_log,"active_detector",fWLBox,false,0,true);
-       // incathPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+photo_cath_height)),pmt_inactive_cath_log,"inactive_detector",fWLBox,false,0,true);
-///home/iwsatlas1/hayward/Documents/LOSim/
-        // vacPlacement = new G4PVPlacement(0,G4ThreeVector(),pmt_void,"vacuum",pmt_case_log,false,0);
-//
-//   //  Place table and breadboard
-    //   breadboardPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+bread_board_thickness+fullPMT_height+4*cm)),breadboard_log,"breadboard",fWLBox,false,0);
-    //   tablePlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+2*bread_board_thickness+table_thickness+fullPMT_height+4*cm)),table_log,"table",fWLBox,false,0);
-//
-//   // Place source holder
-    //    collimator_phys = new G4PVPlacement(0,G4ThreeVector(0,0,58*mm),pom_holder_log,"collimator",fWLBox, false, 0,true);
-    //    al_phys = new G4PVPlacement(0,G4ThreeVector(0,0,56*mm-outer_al_thickness),al_box_log,"al_collimator",fWLBox,false,0,true);
-
-    //    rotationMatrix5->rotateX(180*deg);
-    //    collimator_phys1 = new G4PVPlacement(rotationMatrix5,G4ThreeVector(0,0,62*mm),pom_holder_log,"collimator1",fWLBox, false, 0,true);
-    //    al_phys1 = new G4PVPlacement(rotationMatrix5,G4ThreeVector(0,0,64*mm+outer_al_thickness),al_box_log,"al_collimator1",fWLBox,false,0,true);
-
-  //   Place PMT support structure
-    //    pmt_holder_phys = new G4PVPlacement(0,G4ThreeVector(0,0,-20*mm),mount_box_log,"holder",fWLBox, false, 0,true);
-
-          break;
-    case 1:
-         fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,position),fLBox,"target",fWLBox,false,0,true);
-    //   Place PMT
-         pmtPlacement = new G4PVPlacement(0,*pmtVector,pmt_case_log,"pmt",fWLBox,false,0,true);
-         cathPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+photo_cath_height)),pmt_cath_log,"active_detector",fWLBox,false,0,true);
-         incathPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+photo_cath_height)),pmt_inactive_cath_log,"inactive_detector",fWLBox,false,0,true);
-
-         rotationMatrix->rotateY(90.*deg);
-         rotationMatrix1->rotateY(90.*deg);
-         pmtPlacement1 = new G4PVPlacement(rotationMatrix,G4ThreeVector(32.9*mm,0,0*mm),pmt_case_log,"pmt1",fWLBox,false,0,true);
-         cathPlacement1 = new G4PVPlacement(rotationMatrix1,G4ThreeVector(33.5*mm-casing_height,0,0*mm),pmt_cath_log,"active_detector1",fWLBox,false,0,true);
-         incathPlacement1 = new G4PVPlacement(rotationMatrix1,G4ThreeVector(33.5*mm-casing_height,0,0*mm),pmt_inactive_cath_log,"inactive_detector1",fWLBox,false,0,true);
-
-         rotationMatrix2->rotateY(-90.*deg);
-         pmtPlacement2 = new G4PVPlacement(rotationMatrix,G4ThreeVector(-32.9*mm,0,0*mm),pmt_case_log,"pmt2",fWLBox,false,0,true);
-         cathPlacement2 = new G4PVPlacement(rotationMatrix2,G4ThreeVector(-(33.5*mm-casing_height),0,0*mm),pmt_cath_log,"active_detector2",fWLBox,false,0,true);
-         incathPlacement2 = new G4PVPlacement(rotationMatrix2,G4ThreeVector(-(33.5*mm-casing_height),0,0*mm),pmt_inactive_cath_log,"inactive_detector2",fWLBox,false,0,true);
-
-         rotationMatrix->rotateX(90.*deg);
-         rotationMatrix->rotateY(90.*deg);
-
-         rotationMatrix3->rotateX(90.*deg);
-         pmtPlacement3 = new G4PVPlacement(rotationMatrix,G4ThreeVector(0,32.9*mm,0*mm),pmt_case_log,"pmt3",fWLBox,false,0,true);
-         cathPlacement3 = new G4PVPlacement(rotationMatrix3,G4ThreeVector(0,-(33.5*mm-casing_height),0*mm),pmt_cath_log,"active_detector3",fWLBox,false,0,true);
-         incathPlacement3 = new G4PVPlacement(rotationMatrix3,G4ThreeVector(0,-(33.5*mm-casing_height),0*mm),pmt_inactive_cath_log,"inactive_detector3",fWLBox,false,0,true);
-
-         rotationMatrix4->rotateX(-90.*deg);
-         pmtPlacement4 = new G4PVPlacement(rotationMatrix,G4ThreeVector(0,-32.9*mm,0*mm),pmt_case_log,"pmt4",fWLBox,false,0,true);
-         cathPlacement4 = new G4PVPlacement(rotationMatrix4,G4ThreeVector(0,(33.5*mm-casing_height),0*mm),pmt_cath_log,"active_detector4",fWLBox,false,0,true);
-         incathPlacement4 = new G4PVPlacement(rotationMatrix4,G4ThreeVector(0,(33.5*mm-casing_height),0*mm),pmt_inactive_cath_log,"inactive_detector4",fWLBox,false,0,true);
-
-         pmtPlacement5 = new G4PVPlacement(0,*pmtVector*-1,pmt_case_log,"pmt5",fWLBox,false,0,true);
-         cathPlacement5 = new G4PVPlacement(0,G4ThreeVector(0,0,(fTargetThickness+photo_cath_height)),pmt_cath_log,"active_detector5",fWLBox,false,0,true);
-         incathPlacement5 = new G4PVPlacement(0,G4ThreeVector(0,0,(fTargetThickness+photo_cath_height)),pmt_inactive_cath_log,"inactive_detector5",fWLBox,false,0,true);
-
-         vacPlacement = new G4PVPlacement(0,G4ThreeVector(),pmt_void,"vacuum",pmt_case_log,false,0);
-
-    //  Place table and breadboard
-         breadboardPlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+bread_board_thickness+fullPMT_height+3*cm)),breadboard_log,"breadboard",fWLBox,false,0);
-         tablePlacement = new G4PVPlacement(0,G4ThreeVector(0,0,-(fTargetThickness+2*bread_board_thickness+table_thickness+fullPMT_height+3*cm)),table_log,"table",fWLBox,false,0);
-
-         // Place source holder
-          collimator_phys = new G4PVPlacement(0,G4ThreeVector(0,0,58*mm),pom_holder_log,"collimator",fWLBox, false, 0,true);
-          al_phys = new G4PVPlacement(0,G4ThreeVector(0,0,56*mm-outer_al_thickness),al_box_log,"al_collimator",fWLBox,false,0,true);
-
-          rotationMatrix5->rotateX(180*deg);
-          collimator_phys1 = new G4PVPlacement(rotationMatrix5,G4ThreeVector(0,0,62*mm),pom_holder_log,"collimator1",fWLBox, false, 0,true);
-          al_phys1 = new G4PVPlacement(rotationMatrix5,G4ThreeVector(0,0,64*mm+outer_al_thickness),al_box_log,"al_collimator1",fWLBox,false,0,true);
-
-    //   Place PMT support structure
-        pmt_holder_phys = new G4PVPlacement(0,G4ThreeVector(0,0,-19*mm),mount_box_log,"holder",fWLBox, false, 0,true);
-      break;
-
-  }
-  // G4GDMLParser* parser1 = new G4GDMLParser();
-  // w = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume();
+  fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,0),plate_log,"plate",fWLBox,false,0,false);
 
   return fWPBox;
 }
