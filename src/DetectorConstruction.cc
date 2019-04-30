@@ -189,8 +189,12 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
 
   G4NistManager* man = G4NistManager::Instance();
 
+  fGlass = man->FindOrBuildMaterial("G4_Pyrex_Glass");
+  fTeflon = man->FindOrBuildMaterial("G4_TEFLON");
   fLAr = man->FindOrBuildMaterial("G4_lAr");
+  fAl = man->FindOrBuildMaterial("G4_Al");
   fSi = man->FindOrBuildMaterial("G4_Si");
+  fPb = man->FindOrBuildMaterial("G4_Pb");
   fCu = man->FindOrBuildMaterial("G4_Cu");
   fGe = man->FindOrBuildMaterial("G4_Ge");
 
