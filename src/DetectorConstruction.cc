@@ -74,7 +74,7 @@ DetectorConstruction::DetectorConstruction()
   fDetectorName = "6pmt_coverage_pe";
   fVolName = "World";
   DefineMaterials();
-//  SetTargetMaterial("Scint");
+  SetTargetMaterial("PEN");
   SetWorldMaterial("Air");
 }
 
@@ -218,24 +218,6 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   G4Element* C = new G4Element("Carbon", "C", z=12, a=12*g/mole);
   G4Element* Pb = new G4Element("Lead", "Pb", z=87, a=207*g/mole);
 
-  fWood = new G4Material
-    ("wood", density=0.9*g/cm3, nelements=3);
-  fWood->AddElement(H , 4);
-  fWood->AddElement(O , 1);
-  fWood->AddElement(C , 2);
-
-  // Plastic casings
-
-  fPOM = new G4Material("POM",density=1.41*g/cm3,nelements=3);
-  fPOM->AddElement(O,1);
-  fPOM->AddElement(C,1);
-  fPOM->AddElement(H,2);
-
-  fABS = new G4Material("ABS",density=1.07*g/cm3,nelements=3);
-  fABS->AddElement(C,15);
-  fABS->AddElement(H,17);
-  fABS->AddElement(N,1);
-
   // Scintillators
 
   fPEN = new G4Material("PEN", density= 1.3*g/cm3, nelements=3);
@@ -260,8 +242,9 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   G4int absEntries = 0;
   ifstream ReadAbs;
 
+  /* Scintillation properties */
   G4String abs_file = "../input_files/Exp4_long.csv";
-  G4double emission_fibre[102]={0};
+  G4double emission_fibre[103]={0};
   ReadAbs.open(abs_file);
   G4double var = GetABS();
   if(ReadAbs.is_open())
@@ -279,6 +262,7 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
       rIndex_fAir[absEntries]=1.0;
       ems_abs[absEntries]=0.02;
       emission_fibre[absEntries]=1.0;
+      G4cout << wavelength << G4endl;
       absEntries++;
     }
   }
@@ -293,13 +277,6 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   assert(sizeof(emission) == sizeof(absEnergy));
   assert(sizeof(rIndex_fAir == sizeof(absEnergy)));
 
-  G4double uv_range[2]={3.099605,5.0};
-  G4double uv_abs[2]={0.00001,0.00001};
-
-  fTargetMPT->AddProperty("WLSABSLENGTH",uv_range,abs,2)->SetSpline(true);
-  fTargetMPT->AddProperty("WLSCOMPONENT",absEnergy, emission_fibre, nEntries1)->SetSpline(true);
-  fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 12*ns);
-
   fTargetMPT->AddProperty("RINDEX",       absEnergy, rIndex, nEntries1)->SetSpline(true);
   fTargetMPT->AddProperty("ABSLENGTH",    absEnergy, abs, nEntries1)->SetSpline(true); // *
   fTargetMPT->AddProperty("FASTCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
@@ -310,6 +287,10 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   fTargetMPT->AddConstProperty("FASTTIMECONSTANT", 5.198*ns);
   fTargetMPT->AddConstProperty("SLOWTIMECONSTANT",24.336*ns);
   fTargetMPT->AddConstProperty("YIELDRATIO",0.05);
+
+  fTargetMPT->AddProperty("WLSABSLENGTH",absEnergy, abs, nEntries1)->SetSpline(true);
+  fTargetMPT->AddProperty("WLSCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
+  fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 12*ns);
 
   fPEN->SetMaterialPropertiesTable(fTargetMPT);
 
@@ -635,9 +616,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ReadEff.close();
   effCounter--;
 
-  G4double energyPerfect[]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 10.*eV};
-  G4double effPerfect[]  = {1, 1, 1, 1, 1};
-  G4double reflPerfect[]  = {0, 0, 0, 0, 0};
+  G4double energyPerfect[]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 4.*eV};//, 10.*eV};
+  G4double effPerfect[]  = {1, 1, 1, 1,0};//, 1};
+  G4double reflPerfect[]  = {0, 0, 0, 0,0};//, 0};
 
   const G4int nPMT_EFF = sizeof(energyPerfect)/sizeof(G4double);
 
@@ -646,6 +627,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   detector_MT->AddProperty("EFFICIENCY", energyPerfect, effPerfect,nPMT_EFF)->SetSpline(true);
   detector_MT->AddProperty("REFLECTIVITY", energyPerfect, reflPerfect,nPMT_EFF)->SetSpline(true);
   perfect_optsurf->SetMaterialPropertiesTable(detector_MT);
+  new G4LogicalSkinSurface("tracker_surf",tracker_log,perfect_optsurf);
 
   G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
   G4RotationMatrix* rotationMatrix1 = new G4RotationMatrix(0,0,0);
@@ -727,7 +709,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     detcounter = detcounter+5;
     rod_counter = rod_counter+3;
   }
-  new G4LogicalSkinSurface("tracker_surf",tracker_log,perfect_optsurf);
+
   tracker_placement = new G4PVPlacement(0, G4ThreeVector(0,0,0),tracker_log,"tracker",fWLBox,false,0,false);
   return fWPBox;
 }
