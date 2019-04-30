@@ -1,0 +1,3 @@
+/PEN/det/setDetectorType 0
+/PEN/det/setTargetMat PEN
+/run/beamOn 1000000
