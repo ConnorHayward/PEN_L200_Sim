@@ -201,7 +201,7 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //No help, variable specified on the command line.
-Geant4_DIR:UNINITIALIZED=/opt/geant4/lib64/Geant4-10.5.0/
+Geant4_DIR:UNINITIALIZED=/opt/geant4/lib64/Geant4-10.5.0
 
 //Value Computed by CMake
 PEN_BINARY_DIR:STATIC=/home/iwsatlas1/hayward/Documents/Simulations/PEN_L200_Sim/build

@@ -2264,6 +2264,7 @@ CMakeFiles/PEN.dir/src/PhysicsList.cc.o
  /opt/geant4/include/Geant4/G4OpBoundaryProcess.hh
  /opt/geant4/include/Geant4/G4OpMieHG.hh
  /opt/geant4/include/Geant4/G4OpRayleigh.hh
+ /opt/geant4/include/Geant4/G4OpWLS.hh
  /opt/geant4/include/Geant4/G4OpticalPhoton.hh
  /opt/geant4/include/Geant4/G4OpticalSurface.hh
  /opt/geant4/include/Geant4/G4OrderedTable.hh
@@ -2407,6 +2408,7 @@ CMakeFiles/PEN.dir/src/PhysicsList.cc.o
  /opt/geant4/include/Geant4/G4VUserPhysicsList.hh
  /opt/geant4/include/Geant4/G4VUserTrackInformation.hh
  /opt/geant4/include/Geant4/G4VVolumeMaterialScanner.hh
+ /opt/geant4/include/Geant4/G4VWLSTimeGeneratorProfile.hh
  /opt/geant4/include/Geant4/G4VoxelNavigation.hh
  /opt/geant4/include/Geant4/G4VoxelNavigation.icc
  /opt/geant4/include/Geant4/G4XiMinus.hh
