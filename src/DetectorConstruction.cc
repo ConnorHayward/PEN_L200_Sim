@@ -243,26 +243,25 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   ifstream ReadAbs;
 
   /* Scintillation properties */
-  G4String abs_file = "../input_files/Exp4_long.csv";
-  G4double emission_fibre[103]={0};
+  G4String abs_file = "../input_files/Exp4.csv";
+  G4double emission_fibre[102]={0};
   ReadAbs.open(abs_file);
   G4double var = GetABS();
   if(ReadAbs.is_open())
   {
     while(!ReadAbs.eof())
     {
-      ReadAbs>>wavelength>>filler>>varabsorlength>>filler>>ems>>filler>>rindex;
+      ReadAbs>>wavelength>>filler>>ems>>filler>>varabsorlength>>filler>>rindex;
       if(ReadAbs.eof()){
         break;
       }
       absEnergy[absEntries] = (1240/wavelength)*eV;
-      abs[absEntries] = 1*m;
+      abs[absEntries] = 10*varabsorlength*cm;
       emission[absEntries] = ems;
       rIndex[absEntries] = 1.65; // 1.4906 for PMMA
       rIndex_fAir[absEntries]=1.0;
       ems_abs[absEntries]=0.02;
       emission_fibre[absEntries]=1.0;
-      G4cout << wavelength << G4endl;
       absEntries++;
     }
   }
@@ -288,9 +287,19 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   fTargetMPT->AddConstProperty("SLOWTIMECONSTANT",24.336*ns);
   fTargetMPT->AddConstProperty("YIELDRATIO",0.05);
 
-  fTargetMPT->AddProperty("WLSABSLENGTH",absEnergy, abs, nEntries1)->SetSpline(true);
-  fTargetMPT->AddProperty("WLSCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
-  fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 12*ns);
+  G4double wls_wavelength[3] = {2.5*eV,3.1*eV,9.6863*eV};
+  G4double wls_length[3] = {10*m,5*cm, 0.01*mm};
+  G4double wls_output[3] = {1,0,0};
+
+    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
+    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
+    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
+    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
+    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
+    fTargetMPT->AddProperty("WLSABSLENGTH",wls_wavelength, wls_length, 3);//->SetSpline(true);
+    fTargetMPT->AddProperty("WLSCOMPONENT",wls_wavelength, wls_output, 3);//->SetSpline(true);
+    fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 50*ns);
+
 
   fPEN->SetMaterialPropertiesTable(fTargetMPT);
 
@@ -507,6 +516,8 @@ Defines detector sensitivities and properties.
 */
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
+    DefineMaterials();
+
     G4GDMLParser parser;
     G4GeometryManager::GetInstance()->OpenGeometry();
     G4LogicalVolumeStore::GetInstance()->Clean();
@@ -616,9 +627,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ReadEff.close();
   effCounter--;
 
-  G4double energyPerfect[]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 4.*eV};//, 10.*eV};
-  G4double effPerfect[]  = {1, 1, 1, 1,0};//, 1};
-  G4double reflPerfect[]  = {0, 0, 0, 0,0};//, 0};
+  G4double energyPerfect[7]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 3.5*eV, 4.*eV, 10.*eV};
+  G4double effPerfect[7]  = {1, 1, 1, 1, 1, 1, 1};
+  G4double reflPerfect[7]  = {0, 0, 0, 0,0,0, 0};
 
   const G4int nPMT_EFF = sizeof(energyPerfect)/sizeof(G4double);
 
@@ -656,7 +667,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   /*
   0 - PMT on base of tile, collimator included.
   */
-  fDetectorType = 0;
 
   /* Middle String */
   for(int i = 0; i < 4; i++){

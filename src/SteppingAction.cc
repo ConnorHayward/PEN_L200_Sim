@@ -117,6 +117,8 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
 		      	case Detection:
 		      	{
 							fEventAction->AddDetectedPhoton();
+							fEventAction->AddWavelength(G4double(1240/(theTrack->GetKineticEnergy()/eV)));
+							//G4cout << G4double(1240/(theTrack->GetKineticEnergy()/eV)) << G4endl;
 							G4String det = thePostPV->GetName();
 			      	break;
 		      	}

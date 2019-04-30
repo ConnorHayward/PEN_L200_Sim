@@ -33,6 +33,7 @@ void EventAction::BeginOfEventAction(const G4Event* myEvent)
 	fTopPhoton =0;
 	fBottomPhoton=0;
 	fSidePhoton=0;
+	fWavelength=0;
 	fEscapedPhoton = 0;
 	fAbsorbedPhoton=0;
 	if (myEvent->GetEventID() % 1000 == 0)
@@ -40,11 +41,11 @@ void EventAction::BeginOfEventAction(const G4Event* myEvent)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-void EventAction::AddWavelength(G4double wavelength){
-	auto analysisManager = G4AnalysisManager::Instance();
-
-	//analysisManager->FillH1(6, wavelength);
-}
+// void EventAction::AddWavelength(G4double wavelength){
+// 	auto analysisManager = G4AnalysisManager::Instance();
+//
+// 	//analysisManager->FillH1(6, wavelength);
+// }
 
 void EventAction::EndOfEventAction(const G4Event* myEvent)
 {
@@ -65,7 +66,7 @@ void EventAction::EndOfEventAction(const G4Event* myEvent)
 
 	 if(fDetectedPhotons > 0){
  		analysisManager->FillNtupleDColumn(0,0,1);
-	// 	analysisManager->FillNtupleDColumn(0,1,fBottomPhoton);
+	 	analysisManager->FillNtupleDColumn(0,1,fWavelength);
 	// 	analysisManager->FillNtupleDColumn(0,2,fSidePhoton);
 	// 	analysisManager->FillNtupleDColumn(0,3,fDetectedPhotons);
 	// 	analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
