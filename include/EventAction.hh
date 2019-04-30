@@ -22,7 +22,10 @@ class EventAction : public G4UserEventAction
     G4double   GetNumberDetectedPhotons(void){return fDetectedPhotons;};
     void    AddDepositedEnergy(G4double newEnergy){fDepositedEnergy += newEnergy;};
     void    AddDepositedEnergyA(G4double newEnergy){fDepositedEnergyA += newEnergy;};
-    void    AddWavelength(G4double newWavelength);
+    void AddWavelength(G4double newWavelength) {
+      fWavelength = newWavelength;
+    }
+    //void    AddWavelength(G4double newWavelength);
     void    AddIWavelength(G4double startWavelength);
     void    AddBAWavelength(G4double boundaryAbsorbedWavelength);
     void    AddProducedPhoton(void) {fProducedPhotons++;};
@@ -37,6 +40,7 @@ class EventAction : public G4UserEventAction
   private:
     RunAction* 	fRunAction;
     G4double fEscapedPhoton;
+    G4double fWavelength;
     G4double fProducedPhotons;
     G4double fDetectedPhotons;
     G4double        fDepositedEnergy;
