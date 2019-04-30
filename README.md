@@ -1,73 +1,48 @@
 # PENSimulation
-GEANT4 Simulation for optimizing thickness of shielding.
+GEANT4 Simulation for viability of PEN in LEGEND200
 
-Simulates various sources of radiation incident on a target. Target thickness and material can be controlled via macro, as can the source type and energy. Includes geometry for detection of scintillation photons in a PMT coupled to the base of the tile, or two SiPMs coupled to the side of the tile.
+Simulates 128 nm photons in liquid argon in a simplified GERDA like geometry. Records the number of events that reach the region where the fiber shroud would be, and the wavelength that was detected.
 
-The following histograms are produced:
-
-Light Output - number of photons detected at the chosen detector type.
-Energy deposited in target, in MeV.
-Light Yield - number of photons produced in an event.
-Ratio of Light Output to Light Yield.
-Number of photons leaving the target. Geometry independent version of light output.
+## How to install
 
 To use: Navigate to build folder and enter:
 
 cmake -DGeant4_DIR=/opt/geant4/lib64/Geant4-10.5.0 ..
 
-This creates the makefile as needed. Then, run make to create the simulation. ./PEN runs the program.
+make -j8
 
+## How to use
+
+To run the program in interactive mode:
+./PEN
+
+If you wish to use the program with a macro file:
+./PEN -m /path/to/macro
+
+## Macro commands
+
+### Detector geometry and materials
 Additional macro commands and cases:
 
 /PEN/det/setTargetMat [material]
 
-Set the target material to supplied material. Material must be loaded in Geant4 prior to calling. Default to air.
+Set the support plates to the chosen material. The following materials have been tested:
 
-
-Materials provided:
-
-G4_TEFLON
-G4_Al
 G4_Si
-G4_Cu
-Water
-G4_Pyrex_Glass
 PEN
-Galactic - vacuum
 
-/PEN/det/setWorldMat [material]
-
-Set the material for the world volume. Default to air.
-
-Tested cases:
-
-air
-Galactic - vacuum
-
-/PEN/det/setSize [number with unit]
-
-Set target thickness to supplied value.
-
-NB: The simulation generates the name of the file automatically using the BestUnit function. Using a thickness that is converted to a decimal value (15 mm becomes 1.5 cm) causes issues with file naming.
 
 /PEN/det/setDetectorType [int 0-1]
 
-Set detector type. Default 0.
+Controls the wls properites of PEN:
 
-  0 - PMT coupled to base of target.
-  1 - 2 SiPMs, coupled to the side of the target.
+  0 - WLS off
+  1 - WLS on
 
-/PEN/gun/sourceType [int 0-6]
+  In testing, probably won't work
 
-Choose the type of source used in the simulation. Allowed cases:
+### Run commands
 
-  0 - perpendicular mono-energetic gamma with fixed position - use with /PEN/gun/sourceEnergy
-  1 - 60Co source
-  2 - 137Cs source
-  3 - 90Sr source
-	4 - 241Am source
-	5 - 106Ru source
+/run/beamOn n
 
-/PEN/gun/sourceEnergy [number with unit]
-
-Set energy for the mono-energetic gamma. Automatically sets source type to 0.
+Run simulation for n events
