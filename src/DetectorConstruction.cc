@@ -180,43 +180,19 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
 
   // fAir
   //
-  G4Element* N = new G4Element("Nitrogen", "N", z=7 , a=14.01*g/mole);
-  G4Element* O = new G4Element("Oxygen"  , "O", z=8 , a=16.00*g/mole);
 
-  fAir = new G4Material("Air", density=1.29*mg/cm3, nelements=2);
-  fAir->AddElement(N, 70.*perCent);
-  fAir->AddElement(O, 30.*perCent);
+
 
   G4NistManager* man = G4NistManager::Instance();
 
-  fGlass = man->FindOrBuildMaterial("G4_Pyrex_Glass");
-  fTeflon = man->FindOrBuildMaterial("G4_TEFLON");
   fLAr = man->FindOrBuildMaterial("G4_lAr");
-  fAl = man->FindOrBuildMaterial("G4_Al");
   fSi = man->FindOrBuildMaterial("G4_Si");
-  fPb = man->FindOrBuildMaterial("G4_Pb");
   fCu = man->FindOrBuildMaterial("G4_Cu");
   fGe = man->FindOrBuildMaterial("G4_Ge");
 
-  G4MaterialPropertiesTable* glassMPT = new G4MaterialPropertiesTable();
-  G4double photonEnergy2[] = {2.479684*eV, 2.610194*eV, 2.755204*eV, 2.883353*eV, 2.917275*eV, 3.099605*eV};
-  G4double refractiveIndex4[] = {1.52, 1.52, 1.52, 1.52, 1.52, 1.52};
-  G4double absorption[] = {10*m,10*m,10*m,10*m,10*m,10*m};
-  assert(sizeof(refractiveIndex4) == sizeof(photonEnergy2));
-  glassMPT->AddProperty("RINDEX",photonEnergy2,refractiveIndex4,6)->SetSpline(true);
-  glassMPT->AddProperty("ABSLENGTH",photonEnergy2,absorption,6);
-  fGlass->SetMaterialPropertiesTable(glassMPT);
-
-  // Water
-  //
   G4Element* H = new G4Element("Hydrogen", "H", z=1 , a=1.01*g/mole);
-
-  G4Material* water = new G4Material("Water", density= 1.0*g/cm3, nelements=2);
-  water->AddElement(H, 2);
-  water->AddElement(O, 1);
-
+  G4Element* O = new G4Element("Oxygen"  , "O", z=8 , a=16.00*g/mole);
   G4Element* C = new G4Element("Carbon", "C", z=12, a=12*g/mole);
-  G4Element* Pb = new G4Element("Lead", "Pb", z=87, a=207*g/mole);
 
   // Scintillators
 
@@ -303,16 +279,6 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
 
   fPEN->SetMaterialPropertiesTable(fTargetMPT);
 
-  density = universe_mean_density;    //from PhysicalConstants.h
-  fVacuum = new G4Material("Galactic", z=1., a=1.008*g/mole, density,
-                           kStateGas,2.73*kelvin,3.e-18*pascal);
-  //
-  // fAir
-  G4MaterialPropertiesTable* worldMPT = new G4MaterialPropertiesTable();
-  worldMPT->AddProperty("RINDEX", absEnergy, rIndex_fAir, nEntries1)->SetSpline(true);
-
-  fAir->SetMaterialPropertiesTable(worldMPT);
-  fVacuum->SetMaterialPropertiesTable(worldMPT);
 
   G4MaterialPropertiesTable* lARMPT = new G4MaterialPropertiesTable();
   abs_file = "../input_files/lArScint.csv";
@@ -408,7 +374,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   double target_width = 15*mm;
   fBox = new G4Box("target", target_width, target_width, fTargetThickness);
-  fLBox = new G4LogicalVolume(fBox,fScintilator, "target",0,0,0);
+  fLBox = new G4LogicalVolume(fBox,fPEN, "target",0,0,0);
   double position = 0;
 
   double rod_sides = 2.5*mm;
