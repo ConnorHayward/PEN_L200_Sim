@@ -43,16 +43,6 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
   G4String targetName = fDetector->GetTargetMaterialName();
   G4String targetThickness = G4BestUnit(fDetector->GetTargetSize(),"Length");
   G4int sourceName = fPrimary->GetSourceType();
-  G4String sourceString;
-
-  if(sourceName == 0 || sourceName==7){
-    G4String sourceEnergy = G4BestUnit(fPrimary->GetSourceEnergy(),"Energy");
-    sourceString = "gamma-"+ sourceEnergy;
-  }
-  else{
-    sourceString = fPrimary->GetParticleName();
-  }
-
   G4int directory = fDetector->GetDetectorType();
   G4String directorName;
 
