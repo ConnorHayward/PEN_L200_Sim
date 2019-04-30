@@ -362,21 +362,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
-  double thickness_foil = 2.5*mm;
-  double holeHeight = fThickness;
-  G4Box* absorberPb_box = new G4Box("absorber",15*mm,15*mm, 1.5*mm);
-  G4Tubs* hole = new G4Tubs("hole",0*mm,1.5*mm,holeHeight, 0.*deg, 360.*deg);
-  G4SubtractionSolid* collimator = new G4SubtractionSolid("collimator",absorberPb_box,hole);
-
-  G4Box* absorber_foil = new G4Box("foil",15*mm,15*mm,thickness_foil);
-  G4Tubs* hole_foil = new G4Tubs("hole_foil",0*mm,1.5*mm,thickness_foil, 0.*deg, 360.*deg);
-  G4SubtractionSolid* collimator_foil = new G4SubtractionSolid("collimator_foil",absorber_foil,hole_foil);
-
-  double target_width = 15*mm;
-  fBox = new G4Box("target", target_width, target_width, fTargetThickness);
-  fLBox = new G4LogicalVolume(fBox,fPEN, "target",0,0,0);
-  double position = 0;
-
   double rod_sides = 2.5*mm;
   double rod_length = 48*mm;
 
@@ -390,71 +375,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Tubs* hit_tracker = new G4Tubs("tracker",0.25*m,0.26*m,0.5*m,0.*deg,360.*deg);
   G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fLAr, "tracker",0,0,0);
 
-  G4NistManager* man = G4NistManager::Instance();
-
   // Silicon Plates
 
   fSiliconPlate_h = 1.5*mm;
-  fHolderWidth = 90.00*mm;
-
-  G4double trg_b = (fHolderWidth/sqrt(2.))*mm;
-  G4double trg_h = 45.*mm;
-  G4double rect_x = 2.*(trg_h + 9.5*mm);
-  G4double rect_y = fHolderWidth;
-  G4double rect_bc_x = 28.*mm;
-  G4double cut_x = 20.*mm;
-  G4double cut_y = 31.*mm;
 
   SiliconPlateConstruction plate;
   G4VSolid* final_plate = plate.ConstructPlate();
   G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fTargetMaterial,"plate");
   G4cout <<  G4BestUnit(plate_log->GetMass(true),"Mass") << G4endl;
-  G4ThreeVector point = G4ThreeVector(0,0,5*cm);
-
-  // Dummy plate for side detector
-
-  G4VSolid* plate_side_det = new G4Box("side_det",rect_x/2,trg_h+1*mm,0.45*fSiliconPlate_h);
-  G4VSolid* side_det = new G4SubtractionSolid("side_det",plate_side_det,final_plate);
-
-  G4Navigator* pointNavigator = new G4Navigator();
-  pointNavigator->SetWorldVolume(fWPBox);
-  pointNavigator->LocateGlobalPointAndSetup(point);
 
   // --------------Detectors--------------
   char filler;
   G4double wavelength;
-
-  G4double cath_eff;
-  G4double photocath_energy[57];
-  G4double photocath_EFF[57];
-  G4double perfect_EFF[57];
-  G4double perfect_REFL[57];
-  G4double photocath_REFL[57]={0};
-  G4String pmt_file = "../input_files/pmtQE.csv";
-
-  ifstream ReadEff;
-  G4int effCounter = 0;
-  ReadEff.open(pmt_file);
-
-  if(ReadEff.is_open())
-  {
-    while(!ReadEff.eof())
-    {
-      ReadEff>>wavelength>>filler>>cath_eff;
-      if(ReadEff.eof()){
-        break;
-      }
-      photocath_energy[57-effCounter] = (1240/wavelength)*eV;
-      photocath_EFF[57-effCounter] = cath_eff;
-      perfect_EFF[57-effCounter] = 1;
-      perfect_REFL[57-effCounter] = 0;
-      effCounter++;
-    }
-  }
-
-  else G4cout<<"Error opening file: " <<pmt_file<<G4endl;
-  ReadEff.close();
-  effCounter--;
 
   G4double energyPerfect[7]  = {0.*eV, 1.*eV, 2.*eV, 3.*eV, 3.5*eV, 4.*eV, 10.*eV};
   G4double effPerfect[7]  = {1, 1, 1, 1, 1, 1, 1};
@@ -468,10 +400,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   detector_MT->AddProperty("REFLECTIVITY", energyPerfect, reflPerfect,nPMT_EFF)->SetSpline(true);
   perfect_optsurf->SetMaterialPropertiesTable(detector_MT);
   new G4LogicalSkinSurface("tracker_surf",tracker_log,perfect_optsurf);
-
-  G4RotationMatrix* rotationMatrix = new G4RotationMatrix(0,0,0);
-  G4RotationMatrix* rotationMatrix1 = new G4RotationMatrix(0,0,0);
-  G4RotationMatrix* rotationMatrix2 = new G4RotationMatrix(0,0,0);
 
   G4VisAttributes* detectorAttr = new G4VisAttributes(G4Colour::Grey());
   detectorAttr->SetVisibility(true);
@@ -514,12 +442,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height-i*5*cm),plate_log,"top-plate",fWLBox,false,3+i,false);
   }
 
-
-  /*
-  radius = 15*cm
-  x = radius * cos(n / num * 2 * PI);
-  y = radius * sin(n / num * 2 * PI);
-  */
   G4double radius = 15*cm;
   G4double x;
   G4double y;
