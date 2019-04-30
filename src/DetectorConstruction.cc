@@ -189,14 +189,8 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
 
   G4NistManager* man = G4NistManager::Instance();
 
-  fGlass = man->FindOrBuildMaterial("G4_Pyrex_Glass");
-  fTeflon = man->FindOr
-
-		  			break;BuildMaterial("G4_TEFLON");
   fLAr = man->FindOrBuildMaterial("G4_lAr");
-  fAl = man->FindOrBuildMaterial("G4_Al");
   fSi = man->FindOrBuildMaterial("G4_Si");
-  fPb = man->FindOrBuildMaterial("G4_Pb");
   fCu = man->FindOrBuildMaterial("G4_Cu");
   fGe = man->FindOrBuildMaterial("G4_Ge");
 
@@ -354,7 +348,7 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   lARMPT->AddConstProperty("SLOWTIMECONSTANT",1300*us);
   lARMPT->AddConstProperty("YIELDRATIO",0.05);
   lARMPT->AddConstProperty("RESOLUTIONSCALE",1.0);
-  fLAr->SetMaterialPropertiesTable(lARMPT)
+  fLAr->SetMaterialPropertiesTable(lARMPT);
 
 }
 
