@@ -203,13 +203,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		if(r>0.6){
 			Z = 19;
-			A = 40;
+			A = 42;
 		}
 		else if (r<0.2){
 			Z = 19;
 			A = 40;
 		}
-		else if(r>0.2 & r<0.6)
+		else if(r>0.2 & r<0.6){
 			Z = 18;
 			A = 39;
 		}
