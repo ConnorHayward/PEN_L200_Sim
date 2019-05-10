@@ -43,6 +43,10 @@ void SteppingAction::UserSteppingAction(const G4Step * theStep)
 	G4StepPoint* thePostPoint = theStep->GetPostStepPoint();
 	G4VPhysicalVolume* thePostPV = thePostPoint->GetPhysicalVolume();
 
+	if ( thePrePV->GetName()=="crystal"){
+		fEventAction->AddDepositedEnergy(theStep->GetTotalEnergyDeposit()/MeV);
+	}
+
 	G4OpBoundaryProcessStatus boundaryStatus=Undefined;
 	static G4ThreadLocal G4OpBoundaryProcess* boundary=NULL;
 

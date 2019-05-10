@@ -178,17 +178,13 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   G4double a, z, density;
   G4int nelements;
 
-  // fAir
-  //
-
-
-
   G4NistManager* man = G4NistManager::Instance();
 
   fLAr = man->FindOrBuildMaterial("G4_lAr");
   fSi = man->FindOrBuildMaterial("G4_Si");
   fCu = man->FindOrBuildMaterial("G4_Cu");
   fGe = man->FindOrBuildMaterial("G4_Ge");
+  fNylon = man->FindOrBuildMaterial("G4_NYLON-8062");
 
   G4Element* H = new G4Element("Hydrogen", "H", z=1 , a=1.01*g/mole);
   G4Element* O = new G4Element("Oxygen"  , "O", z=8 , a=16.00*g/mole);
@@ -320,6 +316,14 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   lARMPT->AddConstProperty("RESOLUTIONSCALE",1.0);
   fLAr->SetMaterialPropertiesTable(lARMPT);
 
+  G4double absEnergyNylon[] = {1.9255*eV, 2.145*eV, 2.2704*eV, 2.4378*eV, 2.6085*eV,2.845*eV,3.0515*eV,3.397*eV};
+  G4double rIndexNylon[]={1.5395, 1.5303, 1.5308,1.5316,1.5324,1.5336,1.5347,1.5367};
+  G4double absNylon[]={1*m, 1*m, 1*m,1*m,1*m,1*m,1*m,1*m};
+  G4MaterialPropertiesTable* nylonMPT = new G4MaterialPropertiesTable();
+  nylonMPT->AddProperty("RINDEX", absEnergyNylon, rIndexNylon, 8)->SetSpline(true);
+  nylonMPT->AddProperty("ABSLENGTH", absEnergyNylon, absNylon, 8)->SetSpline(true);
+  fNylon->SetMaterialPropertiesTable(nylonMPT);
+
 }
 
 void DetectorConstruction::SetVolName(G4ThreeVector thePoint){
@@ -357,9 +361,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 // The experimental Hall
   fWorldBox = new G4Tubs("World",0,0.26*m,0.5*m,0.*deg,360.*deg);
-
   fWLBox = new G4LogicalVolume(fWorldBox,fLAr,"World",0,0,0);
-
   fWPBox = new G4PVPlacement(0,G4ThreeVector(),fWLBox,"World",0,false,0);
 
   double rod_sides = 2.5*mm;
@@ -374,6 +376,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4Tubs* hit_tracker = new G4Tubs("tracker",0.25*m,0.26*m,0.5*m,0.*deg,360.*deg);
   G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fLAr, "tracker",0,0,0);
+
+  // Mini Shroud
+
+  G4Tubs* miniShroud = new G4Tubs("miniShroud", 55*mm, 55.5*mm, 0.4*m, 0.*deg, 360.*deg);
+  G4LogicalVolume* shroud_log = new G4LogicalVolume(miniShroud, fNylon, "shroud",0,0,0);
 
   // Silicon Plates
 
@@ -419,6 +426,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VPhysicalVolume* crystal_placement;
   G4VPhysicalVolume* rod_placement;
   G4VPhysicalVolume* tracker_placement;
+  G4VPhysicalVolume* shroud_placement;
   G4double tmpR = 46.*mm + 1*mm + 1.5*mm;
 
   /*
@@ -436,6 +444,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   }
 
+  shroud_placement = new G4PVPlacement(0, G4ThreeVector(),shroud_log,"shroud",fWLBox,false,0,false);
+
   for(int i = 1; i < 3; i++){
     fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h-i*5*cm),plate_log,"plate",fWLBox,false,3+i,false);
     crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height-i*5*cm),ge_log,"crystal",fWLBox,false,3+i,false);
@@ -447,6 +457,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double y;
   int detcounter = 6;
   int rod_counter = 4;
+  int shroud_counter = 1;
   double PI = 3.1415926535897;
 
   for(int i=0;i<6;i++){
@@ -467,6 +478,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height-j*5*cm),ge_log,"crystal",fWLBox,false,3+detcounter+i+j,false);
       fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height-j*5*cm),plate_log,"top-plate",fWLBox,false,3+detcounter+i+j,false);
     }
+    shroud_placement = new G4PVPlacement(0, G4ThreeVector(x,y,0),shroud_log,"shroud",fWLBox,false,shroud_counter+1,false);
     detcounter = detcounter+5;
     rod_counter = rod_counter+3;
   }

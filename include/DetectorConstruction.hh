@@ -122,20 +122,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4Material* fPEN;
     G4Material* fLAr;
-    G4Material* fAl;
     G4Material* fSi;
-    G4Material* fPb;
     G4Material* fCu;
-    G4Material* fGlass;
-    G4Material* fTeflon;
-    G4Material* fAir;
-    G4Material* fVacuum;
     G4Material* fGe;
-    G4Material* fPOM;
-    G4Material* fWood;
-    G4Material* fABS;
-    G4Material* fScintilator;
-    G4Material* Pstyrene;
+    G4Material* fNylon;
+
 
     G4int fDetectorType;
     G4String fDetectorName;

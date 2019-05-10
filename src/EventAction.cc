@@ -53,4 +53,14 @@ void EventAction::EndOfEventAction(const G4Event* myEvent)
 	// 	analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
 	 	analysisManager->AddNtupleRow(0);
 	 }
+
+	 if(fDepositedEnergy > 0.0001){
+		 analysisManager->FillNtupleDColumn(1,0,fDepositedEnergy);
+		 analysisManager->AddNtupleRow(1);
+	 }
+
+	 if(fDepositedEnergy > 0.0001 & fDetectedPhotons < 3){
+		 analysisManager->FillNtupleDColumn(2,0,fDepositedEnergy);
+		 analysisManager->AddNtupleRow(1);
+	 }
 }

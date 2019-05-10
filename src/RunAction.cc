@@ -59,6 +59,14 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
  fMan->CreateNtupleDColumn("Hits");
  fMan->CreateNtupleDColumn("Wavelength");
  fMan->FinishNtuple();
+
+ fMan->CreateNtuple("Ge_Energy","Test");
+ fMan->CreateNtupleDColumn("Energy [MeV]");
+ fMan->FinishNtuple();
+
+ fMan->CreateNtuple("Ge_Energy_lAr","Test");
+ fMan->CreateNtupleDColumn("Energy [MeV]");
+ fMan->FinishNtuple();
 }
 
 void RunAction::SetFileName(G4String fileName)

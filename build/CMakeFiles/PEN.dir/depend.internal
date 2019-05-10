@@ -2549,7 +2549,12 @@ CMakeFiles/PEN.dir/src/PrimaryGeneratorAction.cc.o
  /opt/geant4/include/Geant4/G4Cons.hh
  /opt/geant4/include/Geant4/G4Cons.icc
  /opt/geant4/include/Geant4/G4DCofThisEvent.hh
+ /opt/geant4/include/Geant4/G4DataVector.hh
+ /opt/geant4/include/Geant4/G4DataVector.icc
  /opt/geant4/include/Geant4/G4DecayTable.hh
+ /opt/geant4/include/Geant4/G4Element.hh
+ /opt/geant4/include/Geant4/G4ElementTable.hh
+ /opt/geant4/include/Geant4/G4ElementVector.hh
  /opt/geant4/include/Geant4/G4Ellipsoid.hh
  /opt/geant4/include/Geant4/G4Ellipsoid.icc
  /opt/geant4/include/Geant4/G4EnvironmentUtils.hh
@@ -2557,6 +2562,7 @@ CMakeFiles/PEN.dir/src/PrimaryGeneratorAction.cc.o
  /opt/geant4/include/Geant4/G4Event.hh
  /opt/geant4/include/Geant4/G4Exception.hh
  /opt/geant4/include/Geant4/G4ExceptionSeverity.hh
+ /opt/geant4/include/Geant4/G4Exp.hh
  /opt/geant4/include/Geant4/G4ExtrudedSolid.hh
  /opt/geant4/include/Geant4/G4ExtrudedSolid.icc
  /opt/geant4/include/Geant4/G4GDMLAuxStructType.hh
@@ -2588,14 +2594,20 @@ CMakeFiles/PEN.dir/src/PrimaryGeneratorAction.cc.o
  /opt/geant4/include/Geant4/G4Hype.hh
  /opt/geant4/include/Geant4/G4Hype.icc
  /opt/geant4/include/Geant4/G4IonTable.hh
+ /opt/geant4/include/Geant4/G4IonisParamElm.hh
+ /opt/geant4/include/Geant4/G4IonisParamMat.hh
  /opt/geant4/include/Geant4/G4Ions.hh
+ /opt/geant4/include/Geant4/G4Isotope.hh
+ /opt/geant4/include/Geant4/G4IsotopeVector.hh
  /opt/geant4/include/Geant4/G4Log.hh
  /opt/geant4/include/Geant4/G4LogicalVolume.hh
  /opt/geant4/include/Geant4/G4LogicalVolume.icc
+ /opt/geant4/include/Geant4/G4Material.hh
  /opt/geant4/include/Geant4/G4MaterialPropertiesIndex.hh
  /opt/geant4/include/Geant4/G4MaterialPropertiesTable.hh
  /opt/geant4/include/Geant4/G4MaterialPropertiesTable.icc
  /opt/geant4/include/Geant4/G4MaterialPropertyVector.hh
+ /opt/geant4/include/Geant4/G4MaterialTable.hh
  /opt/geant4/include/Geant4/G4MultiUnion.hh
  /opt/geant4/include/Geant4/G4NavigationHistory.hh
  /opt/geant4/include/Geant4/G4NavigationHistory.icc
@@ -2613,6 +2625,7 @@ CMakeFiles/PEN.dir/src/PrimaryGeneratorAction.cc.o
  /opt/geant4/include/Geant4/G4OpticalPhoton.hh
  /opt/geant4/include/Geant4/G4Orb.hh
  /opt/geant4/include/Geant4/G4Orb.icc
+ /opt/geant4/include/Geant4/G4OrderedTable.hh
  /opt/geant4/include/Geant4/G4PDefManager.hh
  /opt/geant4/include/Geant4/G4Para.hh
  /opt/geant4/include/Geant4/G4Para.icc
@@ -2651,6 +2664,7 @@ CMakeFiles/PEN.dir/src/PrimaryGeneratorAction.cc.o
  /opt/geant4/include/Geant4/G4RotationMatrix.hh
  /opt/geant4/include/Geant4/G4STRead.hh
  /opt/geant4/include/Geant4/G4SafetyHelper.hh
+ /opt/geant4/include/Geant4/G4SandiaTable.hh
  /opt/geant4/include/Geant4/G4SmartVoxelHeader.hh
  /opt/geant4/include/Geant4/G4SmartVoxelHeader.icc
  /opt/geant4/include/Geant4/G4SmartVoxelNode.hh
