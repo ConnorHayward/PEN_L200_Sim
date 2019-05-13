@@ -367,16 +367,47 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   double rod_sides = 2.5*mm;
   double rod_length = 48*mm;
 
-  G4Tubs* rod = new G4Tubs("target",0,1.5*mm,18*cm,0.*deg,360.*deg);
+  G4Tubs* rod = new G4Tubs("target",0,1.5*mm,32.5*cm,0.*deg,360.*deg);
   G4LogicalVolume* rod_log = new G4LogicalVolume(rod,fCu,"target",0,0,0);
 
-  G4double detector_height = 14*mm;
+  G4double detector_height = 43*mm;
   G4Tubs* geDetector = new G4Tubs("Crystal", 0, 31.5*mm, detector_height, 0.*deg, 360.*deg);
   G4LogicalVolume* ge_log = new G4LogicalVolume(geDetector, fGe, "crystal_log",0,0,0);
 
   G4Tubs* hit_tracker = new G4Tubs("tracker",0.25*m,0.26*m,0.5*m,0.*deg,360.*deg);
   G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fLAr, "tracker",0,0,0);
 
+  // Cables
+  G4RotationMatrix* cableRotation = new G4RotationMatrix();
+  cableRotation->rotateX(90.*deg);
+  cableRotation->rotateY(90.*deg);
+  cableRotation->rotateZ(0.*deg);
+
+  G4RotationMatrix* cableRotationTwo = new G4RotationMatrix();
+  cableRotationTwo->rotateX(90.*deg);
+  cableRotationTwo->rotateY(90.*deg);
+  cableRotationTwo->rotateY(180.*deg);
+
+  G4VSolid* toroidSolid =  new G4Torus("ToroidSolid", 0*mm, 0.15*mm, 6*mm, 0.*deg, 140.*deg);
+  G4LogicalVolume* toroidLog = new  G4LogicalVolume( toroidSolid, fPEN, "ToroidLog", 0, 0, 0);
+
+  // Copper cables (vertical part)
+  G4RotationMatrix* VcoppercableRotation = new G4RotationMatrix();
+  VcoppercableRotation->rotateZ(90.*deg);
+  VcoppercableRotation->rotateX(0.*deg);
+  VcoppercableRotation->rotateY(90.*deg);
+
+
+  G4VSolid* VcoppercableSolid = new G4Box("VCopperCableSolid", 44.95*mm, 5.0*mm, 0.05*mm);
+  G4LogicalVolume* VcoppercableLog = new G4LogicalVolume(VcoppercableSolid, fCu, "VCopperCableLog", 0, 0, 0);
+
+  // Copper cables (horizontal part)
+  G4VSolid* H1coppercableSolid = new G4Box("H1CopperCableSolid", 8.5*mm, 20.8*mm, 0.05*mm);
+  G4LogicalVolume* H1coppercableLog = new G4LogicalVolume(H1coppercableSolid, fCu, "H1CopperCableLog", 0, 0, 0);
+  G4VSolid* H2coppercableSolid = new G4Box("H2CopperCableSolid", 8.5*mm, 8.8*mm, 0.05*mm);
+  G4LogicalVolume* H2coppercableLog = new G4LogicalVolume(H2coppercableSolid, fCu, "H2CopperCableLog", 0, 0, 0);
+
+  //G4VPhysicalVolume* toroidPhys = new  G4PVPlacement( cableRotation, G4ThreeVector(0, -1*mm, -0.3*mm), toroidLog, "aToroidPhys", fWLBox, 0, 0);
   // Mini Shroud
 
   G4Tubs* miniShroud = new G4Tubs("miniShroud", 55*mm, 55.5*mm, 0.4*m, 0.*deg, 360.*deg);
@@ -384,12 +415,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   // Contact
 
-  G4Tubs* contact = new G4Tubs("contact", 0, 5*mm, 0.15*mm, 0.*deg, 360.*deg);
+  G4Tubs* contact = new G4Tubs("contact", 0, 2.5*mm, 0.15*mm, 0.*deg, 360.*deg);
   G4LogicalVolume* contact_log = new G4LogicalVolume(contact, fGe, "shroud",0,0,0);
 
   // Silicon Plates
 
-  fSiliconPlate_h = 1.5*mm;
+  fSiliconPlate_h = 0.75*mm;
 
   SiliconPlateConstruction plate;
   G4VSolid* final_plate = plate.ConstructPlate();
@@ -417,11 +448,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   detectorAttr->SetVisibility(true);
   detectorAttr->SetForceSolid(true);
   ge_log->SetVisAttributes(detectorAttr);
+  toroidLog->SetVisAttributes(detectorAttr);
 
   G4VisAttributes* rodAttr = new G4VisAttributes(G4Colour::Brown());
   rodAttr->SetVisibility(true);
   rodAttr->SetForceSolid(true);
   rod_log->SetVisAttributes(rodAttr);
+  VcoppercableLog->SetVisAttributes(rodAttr);
+  H1coppercableLog->SetVisAttributes(rodAttr);
+  H2coppercableLog->SetVisAttributes(rodAttr);
 
   G4VisAttributes* plateAttr = new G4VisAttributes(G4Colour::Blue());
   plateAttr->SetVisibility(true);
@@ -433,11 +468,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   contactAttr->SetForceSolid(true);
   contact_log->SetVisAttributes(contactAttr);
 
+
+
   G4VPhysicalVolume* crystal_placement;
   G4VPhysicalVolume* rod_placement;
   G4VPhysicalVolume* tracker_placement;
   G4VPhysicalVolume* shroud_placement;
   G4VPhysicalVolume* contact_placement;
+  G4VPhysicalVolume* cable_placement;
+  G4VPhysicalVolume* Vcoppercable_placement;
+  G4VPhysicalVolume* H1coppercable_placement;
+  G4VPhysicalVolume* H2coppercable_placement;
   G4double tmpR = 46.*mm + 1*mm + 1.5*mm;
 
   /*
@@ -446,25 +487,38 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   /* Middle String */
   for(int i = 0; i < 4; i++){
-    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h+i*5*cm),plate_log,"plate",fWLBox,false,i,false);
-    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height+i*5*cm),ge_log,"crystal",fWLBox,false,i,false);
-    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,0,i*5*cm-0.15*mm),contact_log, "contact",fWLBox, i,false);
-    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,1.8*cm,i*5*cm-0.15*mm),contact_log, "contact",fWLBox, i,false);
-    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height+i*5*cm),plate_log,"top-plate",fWLBox,false,i,false);
+    fPBox             = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h-2.4*mm+i*10*cm),plate_log,"plate",fWLBox,false,i,false);
+    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height+i*10*cm),ge_log,"crystal",fWLBox,false,i,false);
+    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,0.5*cm,i*10*cm-0.15*mm),contact_log, "contact",fWLBox, i,false);
+    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,1.8*cm,i*10*cm-0.15*mm),contact_log, "contact",fWLBox, i,false);
+    fPBox             = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height+2.4*mm+i*10*cm),plate_log,"top-plate",fWLBox,false,i,false);
+    cable_placement   = new  G4PVPlacement( cableRotation, G4ThreeVector(0, -1*mm, -0.3*mm+i*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+    cable_placement   = new  G4PVPlacement( cableRotationTwo, G4ThreeVector(0, 24*mm, -0.3*mm+i*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
     const G4double VertBarAngle = ((G4double) i) * 120.*deg;
-    const G4ThreeVector VertBarTranslation (/* x */ tmpR * std::cos(VertBarAngle),  /* y */ tmpR * std::sin(VertBarAngle), /* z */ 0.);
-    rod_placement = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,i,false);
+    const G4ThreeVector VertBarTranslation (/* x */ tmpR * std::cos(VertBarAngle),  /* y */ tmpR * std::sin(VertBarAngle), /* z */ +11.25*cm);
+    rod_placement     = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,i,false);
+    Vcoppercable_placement = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(0, 45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm + i*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+    Vcoppercable_placement = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(0, -45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm + i*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+    H1coppercable_placement = new G4PVPlacement(0,G4ThreeVector(0, -24.2, -2.4 - 2*fSiliconPlate_h  - 0.05*mm + i*10*cm), H1coppercableLog, "H1CopperCablePhys", fWLBox, 0, 0);
+    H2coppercable_placement = new G4PVPlacement(0,G4ThreeVector(0, 36.2, -2.4 - 2*fSiliconPlate_h - 0.05*mm + i*10*cm), H2coppercableLog, "H2CopperCablePhys", fWLBox, 0, 0);
 
   }
 
   shroud_placement = new G4PVPlacement(0, G4ThreeVector(),shroud_log,"shroud",fWLBox,false,0,false);
 
   for(int i = 1; i < 3; i++){
-    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h-i*5*cm),plate_log,"plate",fWLBox,false,3+i,false);
-    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height-i*5*cm),ge_log,"crystal",fWLBox,false,3+i,false);
-    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,0,-i*5*cm-0.15*mm),contact_log, "contact",fWLBox, 3+i,false);
-    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,1.8*cm,-i*5*cm-0.15*mm),contact_log, "contact",fWLBox, 3+i,false);
-    fPBox = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height-i*5*cm),plate_log,"top-plate",fWLBox,false,3+i,false);
+    fPBox             = new G4PVPlacement(0, G4ThreeVector(0,0,-fSiliconPlate_h-2.4*mm-i*10*cm),plate_log,"plate",fWLBox,false,3+i,false);
+    crystal_placement = new G4PVPlacement(0, G4ThreeVector(0,0,detector_height-i*10*cm),ge_log,"crystal",fWLBox,false,3+i,false);
+    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,0.5*cm,-i*10*cm-0.15*mm),contact_log, "contact",fWLBox, 3+i,false);
+    contact_placement = new G4PVPlacement(0, G4ThreeVector(0,1.8*cm,-i*10*cm-0.15*mm),contact_log, "contact",fWLBox, 3+i,false);
+    fPBox             = new G4PVPlacement(0, G4ThreeVector(0,0,fSiliconPlate_h+2*detector_height+2.4*mm-i*10*cm),plate_log,"top-plate",fWLBox,false,3+i,false);
+    cable_placement   = new  G4PVPlacement( cableRotation, G4ThreeVector(0, -1*mm, -0.3*mm-i*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+    cable_placement   = new  G4PVPlacement( cableRotationTwo, G4ThreeVector(0, 24*mm, -0.3*mm-i*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+    Vcoppercable_placement = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(0, 45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm - i*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+    Vcoppercable_placement = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(0, -45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm - i*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+    H1coppercable_placement = new G4PVPlacement(0,G4ThreeVector(0, -24.2, -2.4 - 2*fSiliconPlate_h  - 0.05*mm - i*10*cm), H1coppercableLog, "H1CopperCablePhys", fWLBox, 0, 0);
+    H2coppercable_placement = new G4PVPlacement(0,G4ThreeVector(0, 36.2, -2.4 - 2*fSiliconPlate_h - 0.05*mm - i*10*cm), H2coppercableLog, "H2CopperCablePhys", fWLBox, 0, 0);
+
   }
 
   G4double radius = 15*cm;
@@ -480,22 +534,34 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     y = radius * sin(2 * PI * i/6);
 
     for(int j = 0; j < 4; j++){
-      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h+j*5*cm-5*mm),plate_log,"plate",fWLBox,false,detcounter+i+j,false);
-      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height+j*5*cm),ge_log,"crystal",fWLBox,false,detcounter+i+j,false);
-      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y,j*5*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
-      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+8*mm+1*cm,j*5*cm-0.15*mm),contact_log, "contact",fWLBox, 1+detcounter+i+j,false);
-      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height+5*mm+j*5*cm),plate_log,"top-plate",fWLBox,false,detcounter+i+j,false);
+      fPBox             = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h+j*10*cm-2.4*mm),plate_log,"plate",fWLBox,false,detcounter+i+j,false);
+      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height+j*10*cm),ge_log,"crystal",fWLBox,false,detcounter+i+j,false);
+      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+0.5*cm,j*10*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
+      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+1.8*cm,j*10*cm-0.15*mm),contact_log, "contact",fWLBox, 1+detcounter+i+j,false);
+      fPBox             = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height+2.4*mm+j*10*cm),plate_log,"top-plate",fWLBox,false,detcounter+i+j,false);
       const G4double VertBarAngle = ((G4double) j) * 120.*deg;
-      const G4ThreeVector VertBarTranslation (/* x */ x+tmpR * std::cos(VertBarAngle),  /* y */ y+tmpR * std::sin(VertBarAngle), /* z */ 0.);
-      rod_placement = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,rod_counter+i+j,false);
+      const G4ThreeVector VertBarTranslation (/* x */ x+tmpR * std::cos(VertBarAngle),  /* y */ y+tmpR * std::sin(VertBarAngle), /* z */ +11.25*cm);
+      rod_placement     = new G4PVPlacement(0, VertBarTranslation, rod_log,"support rod",fWLBox,false,rod_counter+i+j,false);
+      cable_placement   = new  G4PVPlacement( cableRotation, G4ThreeVector(x, y-1*mm, -0.3*mm+j*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+      cable_placement   = new  G4PVPlacement( cableRotationTwo, G4ThreeVector(x, y+24*mm, -0.3*mm+j*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+      Vcoppercable_placement  = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(x, y+45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm + j*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+      Vcoppercable_placement  = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(x, y-45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm + j*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+      H1coppercable_placement = new G4PVPlacement(0,G4ThreeVector(x,y -24.2, -2.4 - 2*fSiliconPlate_h  - 0.05*mm + j*10*cm), H1coppercableLog, "H1CopperCablePhys", fWLBox, 0, 0);
+      H2coppercable_placement = new G4PVPlacement(0,G4ThreeVector(x,y+ 36.2, -2.4 - 2*fSiliconPlate_h - 0.05*mm + j*10*cm), H2coppercableLog, "H2CopperCablePhys", fWLBox, 0, 0);
     }
 
     for(int j = 1; j < 3; j++){
-      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h-j*5*cm-5*mm),plate_log,"plate",fWLBox,false,3+detcounter+i+j,false);
-      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height-j*5*cm),ge_log,"crystal",fWLBox,false,3+detcounter+i+j,false);
-      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y,-j*5*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
-      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+1.8*cm,-j*5*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
-      fPBox = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height-j*5*cm+5*mm),plate_log,"top-plate",fWLBox,false,3+detcounter+i+j,false);
+      fPBox             = new G4PVPlacement(0, G4ThreeVector(x,y,-fSiliconPlate_h-j*10*cm-2.4*mm),plate_log,"plate",fWLBox,false,3+detcounter+i+j,false);
+      crystal_placement = new G4PVPlacement(0, G4ThreeVector(x,y,detector_height-j*10*cm),ge_log,"crystal",fWLBox,false,3+detcounter+i+j,false);
+      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+0.5*cm,-j*10*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
+      contact_placement = new G4PVPlacement(0, G4ThreeVector(x,y+1.8*cm,-j*10*cm-0.15*mm),contact_log, "contact",fWLBox, detcounter+i+j,false);
+      fPBox             = new G4PVPlacement(0, G4ThreeVector(x,y,fSiliconPlate_h+2*detector_height-j*10*cm+2.4*mm),plate_log,"top-plate",fWLBox,false,3+detcounter+i+j,false);
+      cable_placement   = new  G4PVPlacement( cableRotation, G4ThreeVector(x, y-1*mm, -0.3*mm-j*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+      cable_placement   = new  G4PVPlacement( cableRotationTwo, G4ThreeVector(x, y+24*mm, -0.3*mm-j*10*cm), toroidLog, "ToroidPhys", fWLBox, 0, 0);
+      Vcoppercable_placement  = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(x, y+45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm - j*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+      Vcoppercable_placement  = new G4PVPlacement(VcoppercableRotation,G4ThreeVector(x, y-45.05*mm, 44.95*mm - 2.4*mm - 2*fSiliconPlate_h - 0.05*mm - j*10*cm), VcoppercableLog, "VCopperCablePhys", fWLBox, 0, 0);
+      H1coppercable_placement = new G4PVPlacement(0,G4ThreeVector(x,y -24.2, -2.4 - 2*fSiliconPlate_h  - 0.05*mm - j*10*cm), H1coppercableLog, "H1CopperCablePhys", fWLBox, 0, 0);
+      H2coppercable_placement = new G4PVPlacement(0,G4ThreeVector(x,y+ 36.2, -2.4 - 2*fSiliconPlate_h - 0.05*mm - j*10*cm), H2coppercableLog, "H2CopperCablePhys", fWLBox, 0, 0);
     }
     shroud_placement = new G4PVPlacement(0, G4ThreeVector(x,y,0),shroud_log,"shroud",fWLBox,false,shroud_counter+1,false);
     detcounter = detcounter+5;
