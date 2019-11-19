@@ -7,6 +7,7 @@
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 
+
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
 #include "G4Box.hh"
@@ -44,23 +45,29 @@ void EventAction::EndOfEventAction(const G4Event* myEvent)
 {
 
 	auto analysisManager = G4AnalysisManager::Instance();
-
-	 if(fDetectedPhotons > 0){
- 		analysisManager->FillNtupleDColumn(0,0,1);
-	 	analysisManager->FillNtupleDColumn(0,1,fWavelength);
+		analysisManager->FillNtupleDColumn(0,0,myEvent->GetEventID());
+	 // if(fDetectedPhotons > 0){
+ 		analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
+		if (fDetectedPhotons > 3){
+			analysisManager->FillNtupleDColumn(0,5,1);
+		}
+		else{
+			analysisManager->FillNtupleDColumn(0,5,0);
+		}
+	 //	analysisManager->FillNtupleDColumn(0,1,fWavelength);
 	// 	analysisManager->FillNtupleDColumn(0,2,fSidePhoton);
 	// 	analysisManager->FillNtupleDColumn(0,3,fDetectedPhotons);
 	// 	analysisManager->FillNtupleDColumn(0,4,fDepositedEnergy);
 	 	analysisManager->AddNtupleRow(0);
-	 }
 
-	 if(fDepositedEnergy > 0.0001){
-		 analysisManager->FillNtupleDColumn(1,0,fDepositedEnergy);
-		 analysisManager->AddNtupleRow(1);
-	 }
 
-	 if(fDepositedEnergy > 0.0001 & fDetectedPhotons < 3){
-		 analysisManager->FillNtupleDColumn(2,0,fDepositedEnergy);
-		 analysisManager->AddNtupleRow(1);
-	 }
+	 // if(fDepositedEnergy > 0.001){
+		//  analysisManager->FillNtupleDColumn(1,0,fDepositedEnergy);
+		//  analysisManager->AddNtupleRow(1);
+	 // }
+	 //
+	 // if(fDepositedEnergy > 0.001 & fDetectedPhotons < 3){
+		//  analysisManager->FillNtupleDColumn(2,0,fDepositedEnergy);
+		//  analysisManager->AddNtupleRow(1);
+	 // }
 }

@@ -1,5 +1,6 @@
 #include "PrimaryGeneratorAction.hh"
 #include "PrimaryGeneratorMessenger.hh"
+#include "Analysis.hh"
 
 #include "Randomize.hh"
 #include "DetectorConstruction.hh"
@@ -202,14 +203,11 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		if(r>0.6){
-			Z = 19;
-			A = 42;
+			Z = 32;
+			A = 76;
 		}
-		else if (r<0.2){
-			Z = 19;
-			A = 40;
-		}
-		else if(r>0.2 & r<0.6){
+
+		else if(r<0.6){
 			Z = 18;
 			A = 39;
 		}
@@ -220,7 +218,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		fParticleGun->SetParticleDefinition(ion);
 		fParticleGun->SetParticleCharge(ionCharge);
 	}
-	else if(matName =="PEN" || matName == "G4_Cu"){
+	else if(matName =="PEN"){
 		Z = 19;
 		A = 40;
 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
@@ -231,8 +229,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		fParticleGun->SetParticleCharge(ionCharge);
 	}
 	else if(matName =="G4_Cu"){
-		Z = 27;
-		A = 60;
+		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		if(r>0.4){
+			Z = 27;
+			A = 60;}
+		else if(r<0.4){
+				Z = 19;
+				A = 34;
+		}
 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
 		fParticleGun->SetParticleEnergy(0*eV);
 		fParticleGun->SetParticlePosition(fPoint);
@@ -243,13 +247,24 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	else if(matName == "G4_NYLON-8062"){
 
 		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		if(r>0.5){
-			Z = 92;
-			A = 238;
+		if(r>0.9){
+			// 214Pb for U chain
+			Z = 82;
+			A = 214;
 		}
-		else{
-			Z = 90;
-			A = 228;
+		else if (r<0.9&&r>0.8){
+			// 214Bi for U chain
+			Z = 83;
+			A = 214;
+		}
+		// 228Th chain
+		else if (r<0.8 && 0.7){
+			Z = 83;
+			A = 212;
+		}
+		else if (r<0.8 && 0.7){
+			Z = 81;
+			A = 208;
 		}
 		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
 		fParticleGun->SetParticleEnergy(0*eV);
@@ -258,6 +273,53 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 		fParticleGun->SetParticleDefinition(ion);
 		fParticleGun->SetParticleCharge(ionCharge);
 	}
+	else if(pv->GetName() == "contact"){
+		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		if(r>0.5){
+			Z = 84;
+			A = 210;
+		}
+		else{
+			Z = 98;
+			A = 226;
+		}
+		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
+		fParticleGun->SetParticleEnergy(0*eV);
+		fParticleGun->SetParticlePosition(fPoint);
+		fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
+		fParticleGun->SetParticleDefinition(ion);
+		fParticleGun->SetParticleCharge(ionCharge);
+	}
+	else if(pv->GetName() == "ToroidPhys"){
+		r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		if(r<0.33){
+			Z = 98;
+			A = 226;
+		}
+		else if(r>0.33 && r<0.66){
+			Z = 98;
+			A = 228;
+		}
+		else if (r>0.66 && r>0.43){
+			Z = 90;
+			A = 228;
+		}
+		else if (r>0.43 && r>0.33){
+			Z = 27;
+			A = 60;
+		}
+		ion = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
+		fParticleGun->SetParticleEnergy(0*eV);
+		fParticleGun->SetParticlePosition(fPoint);
+		fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,0.));
+		fParticleGun->SetParticleDefinition(ion);
+		fParticleGun->SetParticleCharge(ionCharge);
+	}
+	auto analysisManager = G4AnalysisManager::Instance();
+
+	analysisManager->FillNtupleSColumn(0,1,G4IonTable::GetIonTable()->GetIonName(Z,A,excitEnergy));
+	analysisManager->FillNtupleSColumn(0,2,matName);
+	analysisManager->FillNtupleSColumn(0,3,pv->GetName());
 	fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 

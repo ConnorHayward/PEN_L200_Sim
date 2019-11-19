@@ -51,17 +51,22 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
 
   G4cout << "### Run " << aRun->GetRunID() << " start." << G4endl;
   fTimer->Start();
-  fFileName = "../Data/"+targetName+"_1"+"_Plates.csv";
+  fFileName = "../Data/"+targetName+"_test"+"_Plates.csv";
   fMan->SetVerboseLevel(0);
   fMan->OpenFile(fFileName);
 
- fMan->CreateNtuple("EscapedDemo","Demo");
- fMan->CreateNtupleDColumn("Hits");
- fMan->CreateNtupleDColumn("Wavelength");
- fMan->FinishNtuple();
+ // fMan->CreateNtuple("EscapedDemo","Demo");
+ // fMan->CreateNtupleDColumn("Hits");
+ // fMan->CreateNtupleDColumn("Wavelength");
+ // fMan->FinishNtuple();
 
  fMan->CreateNtuple("Ge_Energy","Test");
+ fMan->CreateNtupleDColumn("Event No");
+ fMan->CreateNtupleSColumn("Isotope");
+ fMan->CreateNtupleSColumn("Material");
+ fMan->CreateNtupleSColumn("Volume");
  fMan->CreateNtupleDColumn("Energy [MeV]");
+ fMan->CreateNtupleDColumn("Veto");
  fMan->FinishNtuple();
 
  fMan->CreateNtuple("Ge_Energy_lAr","Test");

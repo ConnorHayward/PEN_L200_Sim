@@ -214,7 +214,6 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   G4int absEntries = 0;
   ifstream ReadAbs;
 
-  /* Scintillation properties */
   G4String abs_file = "../input_files/Exp4.csv";
   G4double emission_fibre[102]={0};
   ReadAbs.open(abs_file);
@@ -223,16 +222,17 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   {
     while(!ReadAbs.eof())
     {
-      ReadAbs>>wavelength>>filler>>ems>>filler>>varabsorlength>>filler>>rindex;
+      ReadAbs>>wavelength>>filler>>varabsorlength>>filler>>ems>>filler>>rindex;
       if(ReadAbs.eof()){
         break;
       }
       absEnergy[absEntries] = (1240/wavelength)*eV;
-      abs[absEntries] = 10*varabsorlength*cm;
+      fABSL = 1;
+      abs[absEntries] = varabsorlength*mm;
       emission[absEntries] = ems;
-      rIndex[absEntries] = 1.65; // 1.4906 for PMMA
+      rIndex[absEntries] = 1.65;
       rIndex_fAir[absEntries]=1.0;
-      ems_abs[absEntries]=0.02;
+      ems_abs[absEntries]=ems;
       emission_fibre[absEntries]=1.0;
       absEntries++;
     }
@@ -248,33 +248,25 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   assert(sizeof(emission) == sizeof(absEnergy));
   assert(sizeof(rIndex_fAir == sizeof(absEnergy)));
 
-  fTargetMPT->AddProperty("RINDEX",       absEnergy, rIndex, nEntries1)->SetSpline(true);
-  fTargetMPT->AddProperty("ABSLENGTH",    absEnergy, abs, nEntries1)->SetSpline(true); // *
-  fTargetMPT->AddProperty("FASTCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
-  fTargetMPT->AddProperty("SLOWCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
+  G4double Fiber_energy[] = {2.00*eV,2.87*eV,3.2*eV, 8*eV, 9*eV};
+  G4double Fiber_abslength[]={9.00*m, 9.00*m, 0.01*mm,0.01*mm, 0.01*mm};
 
-  fTargetMPT->AddConstProperty("SCINTILLATIONYIELD",10500./MeV); // * 2.5 * PEN = PS, 10*PEN=PS
-  fTargetMPT->AddConstProperty("RESOLUTIONSCALE",4.0); // * 1, 4, 8
-  fTargetMPT->AddConstProperty("FASTTIMECONSTANT", 5.198*ns);
-  fTargetMPT->AddConstProperty("SLOWTIMECONSTANT",24.336*ns);
-  fTargetMPT->AddConstProperty("YIELDRATIO",0.05);
+  // fTargetMPT->AddProperty("RINDEX",       absEnergy, rIndex, nEntries1)->SetSpline(true);
+  // fTargetMPT->AddProperty("ABSLENGTH",    absEnergy, abs, nEntries1)->SetSpline(true); // *
+  // fTargetMPT->AddProperty("FASTCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
+  // fTargetMPT->AddProperty("SLOWCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
 
-  G4double wls_wavelength[3] = {2.5*eV,3.1*eV,9.6863*eV};
-  G4double wls_length[3] = {10*m,5*cm, 0.01*mm};
-  G4double wls_output[3] = {1,0,0};
+  fTargetMPT->AddProperty("WLSCOMPONENT",absEnergy, emission, nEntries1)->SetSpline(true);
+  fTargetMPT->AddProperty("WLSABSLENGTH",   absEnergy, emission, nEntries1)->SetSpline(true);
 
-    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
-    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
-    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
-    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
-    // G4cout << "---------------------------------------------------------------------------------" << G4endl;
-    fTargetMPT->AddProperty("WLSABSLENGTH",wls_wavelength, wls_length, 3);//->SetSpline(true);
-    fTargetMPT->AddProperty("WLSCOMPONENT",wls_wavelength, wls_output, 3);//->SetSpline(true);
-    fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 50*ns);
-
+  // fTargetMPT->AddConstProperty("SCINTILLATIONYIELD",10500./MeV); // * 2.5 * PEN = PS, 10*PEN=PS
+  // fTargetMPT->AddConstProperty("RESOLUTIONSCALE",4.0); // * 1, 4, 8
+  // fTargetMPT->AddConstProperty("FASTTIMECONSTANT", 5.198*ns);
+  // fTargetMPT->AddConstProperty("SLOWTIMECONSTANT",24.336*ns);
+  // fTargetMPT->AddConstProperty("YIELDRATIO",0.05);
+  // fTargetMPT->AddConstProperty("WLSTIMECONSTANT", 0.5*ns);
 
   fPEN->SetMaterialPropertiesTable(fTargetMPT);
-
 
   G4MaterialPropertiesTable* lARMPT = new G4MaterialPropertiesTable();
   abs_file = "../input_files/lArScint.csv";
@@ -283,17 +275,21 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   absEntries = 0;
   G4double absEnergylArScint[43] = {};
   G4double emissionlArScint[43] = {};
+  G4double abslArScint[43] = {};
 
   if(ReadAbs.is_open())
   {
     while(!ReadAbs.eof())
     {
-      ReadAbs>>wavelength>>filler>>ems;
+      ReadAbs>>wavelength>>filler>>ems;//>>filler>>varabsorlength;
       if(ReadAbs.eof()){
         break;
       }
       absEnergylArScint[absEntries] = (1240/wavelength)*eV;
       emissionlArScint[absEntries] = ems;
+      G4cout <<1240/wavelength << "  " << ems << "  " << varabsorlength <<G4endl;
+      abslArScint[absEntries] = varabsorlength*m;
+
       absEntries++;
     }
   }
@@ -301,15 +297,15 @@ void DetectorConstruction::DefineMaterials(){// ------------- Materials --------
   ReadAbs.close();
   absEntries--;
 
-  G4double absEnergyLAr[]  = {1.9255*eV, 2.145*eV, 2.2704*eV, 2.4378*eV, 2.6085*eV,2.845*eV,3.0515*eV,3.397*eV};
+  G4double absEnergyLAr[]  = {1.0*eV, 1.9255*eV, 2.145*eV, 2.2704*eV, 2.4378*eV, 2.6085*eV,2.845*eV,3.0515*eV,3.397*eV,5.0*eV};
   G4double absLAr[]={10*m,10*m,10*m,10*m,10*m,10*m,10*m,10*m};
-  G4double rIndexLAr[]={1.2295, 1.2303, 1.2308,1.2316,1.2324,1.2336,1.2347,1.2367};
+  G4double rIndexLAr[]={1.2295,1.2295, 1.2303, 1.2308,1.2316,1.2324,1.2336,1.2347,1.2367,1.2367};
 
-  lARMPT->AddProperty("RINDEX",       absEnergyLAr, rIndexLAr, 8)->SetSpline(true);
-  lARMPT->AddProperty("ABSLENGTH",    absEnergyLAr, absLAr, 8)->SetSpline(true);
+  lARMPT->AddProperty("RINDEX",       absEnergyLAr, rIndexLAr, 10)->SetSpline(true);
+  lARMPT->AddProperty("ABSLENGTH",    absEnergyLAr, absLAr, 10)->SetSpline(true);
   lARMPT->AddProperty("FASTCOMPONENT",absEnergylArScint, emissionlArScint, 43)->SetSpline(true);
-  lARMPT->AddProperty("SLOWCOMPONENT",absEnergylArScint, emissionlArScint, nEntries1)->SetSpline(true);
-  lARMPT->AddConstProperty("SCINTILLATIONYIELD", 51.*MeV);
+  lARMPT->AddProperty("SLOWCOMPONENT",absEnergylArScint, emissionlArScint, 43)->SetSpline(true);
+  lARMPT->AddConstProperty("SCINTILLATIONYIELD", 51./MeV);
   lARMPT->AddConstProperty("FASTTIMECONSTANT", 6.2*us);
   lARMPT->AddConstProperty("SLOWTIMECONSTANT",1300*us);
   lARMPT->AddConstProperty("YIELDRATIO",0.05);
@@ -375,7 +371,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4LogicalVolume* ge_log = new G4LogicalVolume(geDetector, fGe, "crystal_log",0,0,0);
 
   G4Tubs* hit_tracker = new G4Tubs("tracker",0.25*m,0.26*m,0.5*m,0.*deg,360.*deg);
-  G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fLAr, "tracker",0,0,0);
+  G4LogicalVolume* tracker_log = new G4LogicalVolume(hit_tracker,fNylon, "tracker",0,0,0);
 
   // Cables
   G4RotationMatrix* cableRotation = new G4RotationMatrix();
@@ -424,7 +420,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   SiliconPlateConstruction plate;
   G4VSolid* final_plate = plate.ConstructPlate();
-  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fTargetMaterial,"plate");
+  G4LogicalVolume* plate_log = new G4LogicalVolume(final_plate,fPEN,"plate");
   G4cout <<  G4BestUnit(plate_log->GetMass(true),"Mass") << G4endl;
 
   // --------------Detectors--------------
@@ -467,8 +463,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   contactAttr->SetVisibility(true);
   contactAttr->SetForceSolid(true);
   contact_log->SetVisAttributes(contactAttr);
-
-
 
   G4VPhysicalVolume* crystal_placement;
   G4VPhysicalVolume* rod_placement;
