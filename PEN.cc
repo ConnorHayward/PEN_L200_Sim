@@ -1,8 +1,8 @@
 #include "G4RunManager.hh"
 
-// #ifdef G4MULTITHREADED
-// #include "G4MTRunManager.hh"
-// #endif
+#ifdef G4MULTITHREADED
+#include "G4MTRunManager.hh"
+#endif
 
 #include "G4UImanager.hh"
 
@@ -69,12 +69,12 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
-// #ifdef G4MULTITHREADED
-//   G4MTRunManager * runManager = new G4MTRunManager;
-//   if ( nThreads > 0 ) runManager->SetNumberOfThreads(nThreads);
-//#else
+#ifdef G4MULTITHREADED
+  G4MTRunManager * runManager = new G4MTRunManager;
+  if ( nThreads > 0 ) runManager->SetNumberOfThreads(nThreads);
+#else
   G4RunManager * runManager = new G4RunManager;
-//#endif
+#endif
 
   // Seed the random number generator manually
   G4Random::setTheSeed(myseed);
@@ -87,12 +87,15 @@ int main(int argc,char** argv)
   // Detector construction
   DetectorConstruction* det = new DetectorConstruction;
   runManager->SetUserInitialization(det);
+
+  //
   // Physics list
   runManager-> SetUserInitialization(new PhysicsList());
 
-  runManager->Initialize();
   // User action initialization
   runManager->SetUserInitialization(new ActionInitialization(det));
+  //G4cout<<"All init"<<G4endl;
+  runManager->Initialize();
 
 
 

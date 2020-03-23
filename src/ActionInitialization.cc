@@ -58,7 +58,8 @@ ActionInitialization::~ActionInitialization()
 
 void ActionInitialization::BuildForMaster() const
 {
- SetUserAction(new RunAction(fDetector));
+  PrimaryGeneratorAction* prim = new PrimaryGeneratorAction(fDetector);
+ SetUserAction(new RunAction(fDetector, prim));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

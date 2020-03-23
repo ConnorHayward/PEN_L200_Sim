@@ -33,7 +33,7 @@
 #include "G4IntersectionSolid.hh"
 #include "G4VoxelLimits.hh"
 
-#include "G4RunManager.hh"
+#include "G4MTRunManager.hh"
 #include "G4PhysicalConstants.hh"
 
 #include "G4GeometryManager.hh"
@@ -93,19 +93,19 @@ void DetectorConstruction::SetSize(G4double value){
   }
   UpdateGeometry();
 
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetLY(G4double value){
   fLY=value;
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetRes(G4double value){
   fRES=value;
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -115,21 +115,21 @@ void DetectorConstruction::SetDetectorType(G4int value){
   fDetectorType=value;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetABS(G4double value){
   fABSL=value;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 void DetectorConstruction::SetDetectorName(G4String name){
   fDetectorName=name;
 
   UpdateGeometry();
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -149,7 +149,7 @@ void DetectorConstruction::SetTargetMaterial(G4String materialChoice)
     G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
            << materialChoice << " not found" << G4endl;
   }
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -168,7 +168,7 @@ void DetectorConstruction::SetWorldMaterial(G4String materialChoice)
     G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
            << materialChoice << " not found" << G4endl;
   }
-  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+  G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 /*
@@ -337,7 +337,7 @@ void DetectorConstruction::SetPropertyTable(G4Material* material, G4MaterialProp
 }
 
 void DetectorConstruction::UpdateGeometry(){
-  G4RunManager::GetRunManager()->DefineWorldVolume(Construct());
+  G4MTRunManager::GetRunManager()->DefineWorldVolume(Construct());
 }
 
 /*
@@ -351,11 +351,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 {
     DefineMaterials();
 
-    G4GDMLParser parser;
-    G4GeometryManager::GetInstance()->OpenGeometry();
-    G4LogicalVolumeStore::GetInstance()->Clean();
-    G4PhysicalVolumeStore::GetInstance()->Clean();
-    G4SolidStore::GetInstance()->Clean();
+    // G4GDMLParser parser;
+    // G4GeometryManager::GetInstance()->OpenGeometry();
+    // G4LogicalVolumeStore::GetInstance()->Clean();
+    // G4PhysicalVolumeStore::GetInstance()->Clean();
+    // G4SolidStore::GetInstance()->Clean();
 
 // ------------- Volumes --------------
 
