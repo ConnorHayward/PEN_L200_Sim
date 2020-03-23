@@ -1,2 +1,3 @@
-Data/*
+Data/*.csv
 build/*
+!build/*.mac
